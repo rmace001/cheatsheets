@@ -6,8 +6,8 @@ Open [`index.html`](./index.html) in a browser for the landing page.
 
 ## Contents
 
-- [`tmux-cheatsheet.html`](./tmux-cheatsheet.html) — Sessions, windows, panes, copy mode
-- [`git-worktrees-cheatsheet.html`](./git-worktrees-cheatsheet.html) — Create, list, prune, plus Node/Next.js tips
+- [`tmux.html`](./tmux.html) — Sessions, windows, panes, copy mode
+- [`git-worktrees.html`](./git-worktrees.html) — Create, list, prune, plus Node/Next.js tips
 
 ## Design
 
@@ -17,7 +17,7 @@ Every cheatsheet uses the shared visual framework documented in [`FRAMEWORK.md`]
 
 See [`AGENTS.md`](./AGENTS.md) for the workflow. The short version:
 
-1. Copy `tmux-cheatsheet.html` as a starting template
+1. Copy `tmux.html` as a starting template
 2. Replace the content cards
 3. Register it in `index.html`
 4. Print-preview to verify it fits on one Letter page

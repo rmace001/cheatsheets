@@ -23,21 +23,21 @@
 ├── AGENTS.md                          ← this file (agent instructions)
 ├── FRAMEWORK.md                       ← design system (tokens, components, rules)
 ├── index.html                         ← dark-mode landing page listing every cheatsheet
-├── tmux-cheatsheet.html               ← canonical reference implementation
-├── git-worktrees-cheatsheet.html
-└── <topic>-cheatsheet.html            ← new cheatsheets go here
+├── tmux.html                          ← canonical reference implementation
+├── git-worktrees.html
+└── <topic>.html                       ← new cheatsheets go here
 ```
 
-**Naming convention:** `<topic>-cheatsheet.html` — kebab-case, always with the `-cheatsheet.html` suffix.
+**Naming convention:** `<topic>.html` — kebab-case, no `-cheatsheet` suffix (the repo name already provides that context).
 
 ## Workflow for Adding a New Cheatsheet
 
 1. **Read `FRAMEWORK.md` first.** It defines tokens, components, and print rules. Do not invent new styles.
-2. **Copy `tmux-cheatsheet.html`** as a starting template — it's the canonical example.
+2. **Copy `tmux.html`** as a starting template — it's the canonical example.
 3. **Replace content cards** (keep the same HTML structure, classes, and `kbd` variants).
 4. **Verify against the framework checklist** in `FRAMEWORK.md` §6 before saving.
 5. **Register in `index.html`** — add a new `<a class="card">` block with:
-   - `href="<topic>-cheatsheet.html"`
+   - `href="<topic>.html"`
    - `data-keywords="…"` (lowercase, space-separated, used for search)
    - icon (single glyph in `.card-icon`, optionally `.blue` or `.orange`)
    - title, one-line subtitle, filename in `.card-meta`
@@ -74,4 +74,4 @@
 
 ## Notes on Origin
 
-This repo grew from a single session in the `mmc-agent-workspace` where the owner asked for a tmux cheatsheet. The design that emerged (dark mode + print stylesheet, color-coded `kbd`, numbered cards, callout for the quick-start recipe) was then distilled into `FRAMEWORK.md` so future cheatsheets stay consistent. Treat `tmux-cheatsheet.html` as the canonical reference implementation when in doubt.
+This repo grew from a single session in the `mmc-agent-workspace` where the owner asked for a tmux cheatsheet. The design that emerged (dark mode + print stylesheet, color-coded `kbd`, numbered cards, callout for the quick-start recipe) was then distilled into `FRAMEWORK.md` so future cheatsheets stay consistent. Treat `tmux.html` as the canonical reference implementation when in doubt.

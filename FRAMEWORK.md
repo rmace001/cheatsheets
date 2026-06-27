@@ -159,7 +159,7 @@ Spans the full grid width by default (`grid-column: 1 / -1`). Use for:
 
 Max **one** callout per page so it stays special.
 
-**7-card variant:** when you have 7 content cards, switch the callout to `grid-column: span 2`. It will share the third row with the 7th card instead of forcing a new row with two empty columns. See `git-worktrees-cheatsheet.html` for a working example.
+**7-card variant:** when you have 7 content cards, switch the callout to `grid-column: span 2`. It will share the third row with the 7th card instead of forcing a new row with two empty columns. See `git-worktrees.html` for a working example.
 
 ### 3g. Footer
 
@@ -213,10 +213,10 @@ Before delivering:
 - [ ] No external assets (no `<link>`, no `<img>`, no `<script>`)
 - [ ] Legend matches every `kbd` variant actually used
 - [ ] Footer includes the ⌘P / Ctrl+P hint
-- [ ] File saved to `~/.copilot/session-state/<id>/files/<topic>-cheatsheet.html` and copied to `~/Desktop/`
+- [ ] File saved to `~/Documents/cheatsheets/<topic>.html`
 
 ---
 
 ## 7. Reference Implementation
 
-See `tmux-cheatsheet.html` in this folder. It is the canonical example — copy it as a starting template and replace the content cards.
+See `tmux.html` in this folder. It is the canonical example — copy it as a starting template and replace the content cards.
