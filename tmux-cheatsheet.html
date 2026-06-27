@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>tmux Cheatsheet — Fundamentals</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c232c;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #7ee787;
+    --accent-2: #79c0ff;
+    --accent-3: #ffa657;
+    --key-bg: #21262d;
+    --key-border: #484f58;
+    --shadow: 0 1px 0 #000, 0 2px 0 #000;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text",
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 32px 40px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+  }
+
+  header .title h1 {
+    margin: 0;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  header .title h1 .accent { color: var(--accent); }
+
+  header .title p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  header .prefix {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  header .prefix strong {
+    display: block;
+    color: var(--accent-2);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    break-inside: avoid;
+  }
+
+  .card h2 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card h2 .num {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: var(--accent);
+    color: #0d1117;
+    font-size: 11px;
+    text-align: center;
+    line-height: 18px;
+    font-weight: 700;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(139, 148, 158, 0.18);
+  }
+  .row:last-child { border-bottom: none; }
+
+  .desc { color: var(--text); }
+  .desc .hint { color: var(--muted); font-size: 11px; display: block; }
+
+  .keys { display: flex; gap: 4px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+
+  kbd {
+    display: inline-block;
+    background: var(--key-bg);
+    color: var(--text);
+    border: 1px solid var(--key-border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    min-width: 16px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  kbd.prefix { color: var(--accent-2); border-color: var(--accent-2); }
+  kbd.cmd { color: var(--accent-3); border-color: #6e4e1a; background: #2a1f0f; }
+  kbd.then { background: transparent; border: none; color: var(--muted); padding: 0 2px; min-width: 0; }
+
+  .callout {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #1f2630 0%, #1a1f27 100%);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .callout strong { color: var(--accent-2); }
+  .callout code {
+    background: var(--key-bg);
+    border: 1px solid var(--key-border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  footer {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* ---------------- Print styles ---------------- */
+  @media print {
+    @page {
+      size: Letter;
+      margin: 0.4in;
+    }
+    html, body {
+      background: #ffffff !important;
+      color: #111827 !important;
+      font-size: 10.5px;
+    }
+    .page { padding: 0; max-width: none; }
+    header { border-color: #111827; }
+    header .title h1 { color: #111827; }
+    header .title h1 .accent { color: #15803d; }
+    header .title p { color: #4b5563; }
+    header .prefix {
+      background: #f3f4f6 !important;
+      border-color: #d1d5db;
+      color: #4b5563;
+    }
+    header .prefix strong { color: #1d4ed8; }
+
+    .legend {
+      background: #f9fafb !important;
+      border-color: #d1d5db;
+      color: #4b5563;
+    }
+
+    .card {
+      background: #ffffff !important;
+      border-color: #d1d5db !important;
+      box-shadow: none;
+    }
+    .card h2 { color: #15803d; }
+    .card h2 .num { background: #15803d; color: #ffffff; }
+
+    .desc { color: #111827; }
+    .desc .hint { color: #6b7280; }
+    .row { border-bottom-color: #e5e7eb; }
+
+    kbd {
+      background: #f3f4f6 !important;
+      color: #111827 !important;
+      border-color: #9ca3af !important;
+    }
+    kbd.prefix { color: #1d4ed8 !important; border-color: #1d4ed8 !important; }
+    kbd.cmd {
+      background: #fff7ed !important;
+      color: #9a3412 !important;
+      border-color: #c2410c !important;
+    }
+    kbd.then { background: transparent !important; border: none !important; color: #6b7280 !important; }
+
+    .callout {
+      background: #f9fafb !important;
+      border-color: #d1d5db !important;
+      border-left: 3px solid #1d4ed8 !important;
+      color: #374151 !important;
+    }
+    .callout strong { color: #1d4ed8 !important; }
+    .callout code {
+      background: #f3f4f6 !important;
+      color: #15803d !important;
+      border-color: #d1d5db !important;
+    }
+
+    footer { color: #6b7280; border-top-color: #d1d5db; }
+
+    .card, .callout { page-break-inside: avoid; }
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="title">
+      <h1><span class="accent">tmux</span> Cheatsheet · Fundamentals</h1>
+      <p>Terminal multiplexer — keep sessions alive, split your terminal, switch between windows.</p>
+    </div>
+    <div class="prefix">
+      <strong>Prefix key</strong>
+      <kbd class="prefix">Ctrl</kbd> + <kbd class="prefix">b</kbd>
+      <div style="margin-top:4px;">Press, release, then type the command</div>
+    </div>
+  </header>
+
+  <div class="legend">
+    <span><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> = prefix (press first)</span>
+    <span><kbd>x</kbd> = regular key</span>
+    <span><kbd class="cmd">tmux …</kbd> = shell command</span>
+    <span><kbd class="then">then</kbd> = press in sequence</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- Sessions -->
+    <div class="card">
+      <h2><span class="num">1</span> Sessions <span style="color:var(--muted);font-weight:normal;text-transform:none;font-size:11px;">(run in shell)</span></h2>
+      <div class="row">
+        <div class="desc">Start a new session</div>
+        <div class="keys"><kbd class="cmd">tmux</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">New named session<span class="hint">easier to find later</span></div>
+        <div class="keys"><kbd class="cmd">tmux new -s work</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">List sessions</div>
+        <div class="keys"><kbd class="cmd">tmux ls</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Attach to last session</div>
+        <div class="keys"><kbd class="cmd">tmux a</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Attach to named session</div>
+        <div class="keys"><kbd class="cmd">tmux a -t work</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Kill a session</div>
+        <div class="keys"><kbd class="cmd">tmux kill-session -t work</kbd></div>
+      </div>
+    </div>
+
+    <!-- Inside tmux: session controls -->
+    <div class="card">
+      <h2><span class="num">2</span> Session Controls <span style="color:var(--muted);font-weight:normal;text-transform:none;font-size:11px;">(inside tmux)</span></h2>
+      <div class="row">
+        <div class="desc">Detach<span class="hint">leave session running in background</span></div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>d</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Show all sessions (switch)</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>s</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Rename current session</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>$</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Command prompt<span class="hint">type any tmux command</span></div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>:</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Show all shortcuts<span class="hint">q to quit help</span></div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>?</kbd></div>
+      </div>
+    </div>
+
+    <!-- Windows -->
+    <div class="card">
+      <h2><span class="num">3</span> Windows <span style="color:var(--muted);font-weight:normal;text-transform:none;font-size:11px;">(like browser tabs)</span></h2>
+      <div class="row">
+        <div class="desc">New window</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>c</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Next window</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>n</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Previous window</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>p</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Jump to window number</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>0</kbd>–<kbd>9</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">List/pick window</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>w</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Rename current window</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>,</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Close current window</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>&amp;</kbd></div>
+      </div>
+    </div>
+
+    <!-- Panes -->
+    <div class="card">
+      <h2><span class="num">4</span> Panes <span style="color:var(--muted);font-weight:normal;text-transform:none;font-size:11px;">(split one window)</span></h2>
+      <div class="row">
+        <div class="desc">Split horizontally<span class="hint">top / bottom</span></div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>"</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Split vertically<span class="hint">left / right</span></div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>%</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Move between panes</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>←</kbd> <kbd>↑</kbd> <kbd>↓</kbd> <kbd>→</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Cycle through panes</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>o</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Show pane numbers<span class="hint">press number to jump</span></div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>q</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Zoom toggle<span class="hint">fullscreen current pane</span></div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>z</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Close current pane</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>x</kbd></div>
+      </div>
+    </div>
+
+    <!-- Pane layout -->
+    <div class="card">
+      <h2><span class="num">5</span> Pane Layout &amp; Resize</h2>
+      <div class="row">
+        <div class="desc">Resize pane<span class="hint">hold prefix, repeat arrow</span></div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>Ctrl</kbd>+<kbd>←↑↓→</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Cycle preset layouts</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>Space</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Swap with next pane</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>}</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Swap with previous pane</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>{</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Break pane into new window</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>!</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Toggle pane sync<span class="hint">type into all panes at once</span></div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>:</kbd> <kbd class="cmd">setw synchronize-panes</kbd></div>
+      </div>
+    </div>
+
+    <!-- Copy mode / scrolling -->
+    <div class="card">
+      <h2><span class="num">6</span> Scroll &amp; Copy Mode</h2>
+      <div class="row">
+        <div class="desc">Enter copy mode<span class="hint">scrollback / select text</span></div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>[</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Exit copy mode</div>
+        <div class="keys"><kbd>q</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Scroll up / down</div>
+        <div class="keys"><kbd>↑</kbd> <kbd>↓</kbd> · <kbd>PgUp</kbd> <kbd>PgDn</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Search backward<span class="hint">in copy mode</span></div>
+        <div class="keys"><kbd>?</kbd> <kbd class="then">then</kbd> text <kbd class="then">·</kbd> <kbd>n</kbd> next</div>
+      </div>
+      <div class="row">
+        <div class="desc">Start selection<span class="hint">default (emacs) keys</span></div>
+        <div class="keys"><kbd>Space</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Copy selection to tmux buffer</div>
+        <div class="keys"><kbd>Enter</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Paste from tmux buffer</div>
+        <div class="keys"><kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd class="then">then</kbd> <kbd>]</kbd></div>
+      </div>
+    </div>
+
+    <!-- Quick recipes / callout -->
+    <div class="callout">
+      <strong>Quick start recipe</strong> &nbsp;·&nbsp;
+      In any shell, type <code>tmux new -s work</code> to start. Split a vertical pane with <kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd>%</kbd>, jump around with the arrow keys, then detach with <kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> <kbd>d</kbd>. Close the terminal — your work keeps running. Come back any time with <code>tmux a -t work</code>.
+      <br><br>
+      <strong>Stuck?</strong> Press <kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> then <kbd>?</kbd> for the full shortcut list (q to exit). To kill tmux entirely, exit each shell with <code>exit</code> or run <code>tmux kill-server</code>.
+    </div>
+
+  </div>
+
+  <footer>
+    <span>tmux fundamentals · prefix is <kbd class="prefix">Ctrl</kbd>+<kbd class="prefix">b</kbd> unless rebound</span>
+    <span>Print / Save as PDF: ⌘P (Mac) · Ctrl+P (Win/Linux)</span>
+  </footer>
+
+</div>
+</body>
+</html>

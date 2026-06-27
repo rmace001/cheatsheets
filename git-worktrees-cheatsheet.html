@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Git Worktrees Cheatsheet — Fundamentals</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c232c;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #7ee787;
+    --accent-2: #79c0ff;
+    --accent-3: #ffa657;
+    --key-bg: #21262d;
+    --key-border: #484f58;
+    --shadow: 0 1px 0 #000, 0 2px 0 #000;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text",
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 32px 40px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+  }
+
+  header .title h1 {
+    margin: 0;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  header .title h1 .accent { color: var(--accent); }
+
+  header .title p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  header .prefix {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+    max-width: 320px;
+  }
+  header .prefix strong {
+    display: block;
+    color: var(--accent-2);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    break-inside: avoid;
+  }
+
+  .card h2 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card h2 .num {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: var(--accent);
+    color: #0d1117;
+    font-size: 11px;
+    text-align: center;
+    line-height: 18px;
+    font-weight: 700;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(139, 148, 158, 0.18);
+  }
+  .row:last-child { border-bottom: none; }
+
+  .desc { color: var(--text); }
+  .desc .hint { color: var(--muted); font-size: 11px; display: block; }
+
+  .keys { display: flex; gap: 4px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+
+  kbd {
+    display: inline-block;
+    background: var(--key-bg);
+    color: var(--text);
+    border: 1px solid var(--key-border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    min-width: 16px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  kbd.prefix { color: var(--accent-2); border-color: var(--accent-2); }
+  kbd.cmd { color: var(--accent-3); border-color: #6e4e1a; background: #2a1f0f; }
+  kbd.then { background: transparent; border: none; color: var(--muted); padding: 0 2px; min-width: 0; }
+
+  .callout {
+    grid-column: span 2;
+    background: linear-gradient(135deg, #1f2630 0%, #1a1f27 100%);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .callout strong { color: var(--accent-2); }
+  .callout code {
+    background: var(--key-bg);
+    border: 1px solid var(--key-border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  footer {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* ---------------- Print styles ---------------- */
+  @media print {
+    @page {
+      size: Letter;
+      margin: 0.4in;
+    }
+    html, body {
+      background: #ffffff !important;
+      color: #111827 !important;
+      font-size: 10.5px;
+    }
+    .page { padding: 0; max-width: none; }
+    header { border-color: #111827; }
+    header .title h1 { color: #111827; }
+    header .title h1 .accent { color: #15803d; }
+    header .title p { color: #4b5563; }
+    header .prefix {
+      background: #f3f4f6 !important;
+      border-color: #d1d5db;
+      color: #4b5563;
+    }
+    header .prefix strong { color: #1d4ed8; }
+
+    .legend {
+      background: #f9fafb !important;
+      border-color: #d1d5db;
+      color: #4b5563;
+    }
+
+    .card {
+      background: #ffffff !important;
+      border-color: #d1d5db !important;
+      box-shadow: none;
+    }
+    .card h2 { color: #15803d; }
+    .card h2 .num { background: #15803d; color: #ffffff; }
+
+    .desc { color: #111827; }
+    .desc .hint { color: #6b7280; }
+    .row { border-bottom-color: #e5e7eb; }
+
+    kbd {
+      background: #f3f4f6 !important;
+      color: #111827 !important;
+      border-color: #9ca3af !important;
+    }
+    kbd.prefix { color: #1d4ed8 !important; border-color: #1d4ed8 !important; }
+    kbd.cmd {
+      background: #fff7ed !important;
+      color: #9a3412 !important;
+      border-color: #c2410c !important;
+    }
+    kbd.then { background: transparent !important; border: none !important; color: #6b7280 !important; }
+
+    .callout {
+      background: #f9fafb !important;
+      border-color: #d1d5db !important;
+      border-left: 3px solid #1d4ed8 !important;
+      color: #374151 !important;
+    }
+    .callout strong { color: #1d4ed8 !important; }
+    .callout code {
+      background: #f3f4f6 !important;
+      color: #15803d !important;
+      border-color: #d1d5db !important;
+    }
+
+    footer { color: #6b7280; border-top-color: #d1d5db; }
+
+    .card, .callout { page-break-inside: avoid; }
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="title">
+      <h1><span class="accent">git worktree</span> Cheatsheet · Fundamentals</h1>
+      <p>Multiple working directories from a single repository — no more stash-and-switch.</p>
+    </div>
+    <div class="prefix">
+      <strong>Key concept</strong>
+      One <code style="color:var(--accent);">.git</code>, many checkouts.
+      <div style="margin-top:4px;">Each worktree is its own folder on its own branch, sharing the same history &amp; remotes.</div>
+    </div>
+  </header>
+
+  <div class="legend">
+    <span><kbd class="cmd">git …</kbd> = shell command</span>
+    <span><kbd>path</kbd> = directory you choose</span>
+    <span><kbd class="prefix">flag</kbd> = important option</span>
+    <span><kbd class="then">·</kbd> = alternatives</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- 1. Create -->
+    <div class="card">
+      <h2><span class="num">1</span> Create a Worktree</h2>
+      <div class="row">
+        <div class="desc">Check out existing branch in new dir</div>
+        <div class="keys"><kbd class="cmd">git worktree add ../feat feat</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Create new branch <em>and</em> worktree<span class="hint">most common — start fresh work</span></div>
+        <div class="keys"><kbd class="cmd">git worktree add -b feat ../feat</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Branch from a specific base</div>
+        <div class="keys"><kbd class="cmd">git worktree add -b hotfix ../hot main</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Track a remote branch<span class="hint">e.g. review someone's PR</span></div>
+        <div class="keys"><kbd class="cmd">git worktree add --track -b feat ../feat origin/feat</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Detached at a commit / tag<span class="hint">read-only inspection</span></div>
+        <div class="keys"><kbd class="cmd">git worktree add --detach ../old v1.2.0</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Force when path is dirty or branch is busy</div>
+        <div class="keys"><kbd class="prefix">-f</kbd></div>
+      </div>
+    </div>
+
+    <!-- 2. List & Inspect -->
+    <div class="card">
+      <h2><span class="num">2</span> List &amp; Inspect</h2>
+      <div class="row">
+        <div class="desc">Show all worktrees</div>
+        <div class="keys"><kbd class="cmd">git worktree list</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Verbose: locks &amp; prunable info</div>
+        <div class="keys"><kbd class="cmd">git worktree list --verbose</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Machine-readable output</div>
+        <div class="keys"><kbd class="cmd">git worktree list --porcelain</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Which branches are taken<span class="hint"><code style="color:var(--accent);">+</code> marks branches checked out elsewhere</span></div>
+        <div class="keys"><kbd class="cmd">git branch</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Where am I?<span class="hint">prints this worktree's root</span></div>
+        <div class="keys"><kbd class="cmd">git rev-parse --show-toplevel</kbd></div>
+      </div>
+    </div>
+
+    <!-- 3. Remove & Prune -->
+    <div class="card">
+      <h2><span class="num">3</span> Remove &amp; Prune</h2>
+      <div class="row">
+        <div class="desc">Remove a clean worktree<span class="hint">deletes the directory</span></div>
+        <div class="keys"><kbd class="cmd">git worktree remove ../feat</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Force-remove (uncommitted changes!)</div>
+        <div class="keys"><kbd class="cmd">git worktree remove -f ../feat</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Clean stale admin entries<span class="hint">after deleting a worktree dir manually</span></div>
+        <div class="keys"><kbd class="cmd">git worktree prune</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Preview what would be pruned</div>
+        <div class="keys"><kbd class="cmd">git worktree prune --dry-run -v</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Delete branch too<span class="hint">after removing the worktree</span></div>
+        <div class="keys"><kbd class="cmd">git branch -D feat</kbd></div>
+      </div>
+    </div>
+
+    <!-- 4. Move, Lock & Repair -->
+    <div class="card">
+      <h2><span class="num">4</span> Move, Lock &amp; Repair</h2>
+      <div class="row">
+        <div class="desc">Move a worktree<span class="hint">updates internal paths</span></div>
+        <div class="keys"><kbd class="cmd">git worktree move ../old ../new</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Fix broken links after manual move</div>
+        <div class="keys"><kbd class="cmd">git worktree repair</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Lock so it can't be pruned<span class="hint">e.g. worktree on a USB drive</span></div>
+        <div class="keys"><kbd class="cmd">git worktree lock --reason "usb" ../bak</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Unlock</div>
+        <div class="keys"><kbd class="cmd">git worktree unlock ../bak</kbd></div>
+      </div>
+    </div>
+
+    <!-- 5. Common Workflows -->
+    <div class="card">
+      <h2><span class="num">5</span> Common Workflows</h2>
+      <div class="row">
+        <div class="desc">Hotfix without disturbing current work</div>
+        <div class="keys"><kbd class="cmd">git worktree add -b hotfix ../hot main</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Review a PR locally</div>
+        <div class="keys"><kbd class="cmd">gh pr checkout 123 --branch pr-123</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Diff between two branches side-by-side<span class="hint">open both worktrees in your editor</span></div>
+        <div class="keys"><kbd class="cmd">cd ../feat &amp;&amp; code .</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Run long test on one branch while coding another</div>
+        <div class="keys"><kbd class="cmd">cd ../ci &amp;&amp; npm test</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Throwaway sandbox at HEAD</div>
+        <div class="keys"><kbd class="cmd">git worktree add --detach ../scratch</kbd></div>
+      </div>
+    </div>
+
+    <!-- 6. Concepts & Gotchas -->
+    <div class="card">
+      <h2><span class="num">6</span> Concepts &amp; Gotchas</h2>
+      <div class="row">
+        <div class="desc">Main repo has a <code style="color:var(--accent);">.git</code> directory; linked worktrees have a <code style="color:var(--accent);">.git</code> <em>file</em> pointing back</div>
+        <div class="keys"></div>
+      </div>
+      <div class="row">
+        <div class="desc">A branch can only be checked out in <strong>one</strong> worktree at a time<span class="hint">switch with <code style="color:var(--accent);">git switch</code> or use a different branch</span></div>
+        <div class="keys"></div>
+      </div>
+      <div class="row">
+        <div class="desc">Worktrees share stash, refs, remotes, hooks &amp; config<span class="hint">they're not independent repos</span></div>
+        <div class="keys"></div>
+      </div>
+      <div class="row">
+        <div class="desc">Submodules &amp; <code style="color:var(--accent);">node_modules</code> aren't shared — install in each</div>
+        <div class="keys"></div>
+      </div>
+      <div class="row">
+        <div class="desc">Place worktrees <em>outside</em> the main repo to avoid Git confusion</div>
+        <div class="keys"></div>
+      </div>
+    </div>
+
+    <!-- 7. Node.js / Next.js Tips -->
+    <div class="card">
+      <h2><span class="num">7</span> Node.js / Next.js Tips</h2>
+      <div class="row">
+        <div class="desc">Clone-copy <code style="color:var(--accent);">node_modules</code><span class="hint">APFS copy-on-write: instant, ~0 disk</span></div>
+        <div class="keys"><kbd class="cmd">cp -cR ../base/node_modules .</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Reconcile after <code style="color:var(--accent);">package-lock.json</code> change</div>
+        <div class="keys"><kbd class="cmd">npm ci</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Never share <code style="color:var(--accent);">.next/</code> between worktrees<span class="hint">build cache + SWC artifacts are branch-specific</span></div>
+        <div class="keys"><kbd class="cmd">rm -rf .next</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Avoid symlinking for <code style="color:var(--accent);">next dev</code><span class="hint">fsevents watchers + dup React = pain</span></div>
+        <div class="keys"></div>
+      </div>
+      <div class="row">
+        <div class="desc">Force a clean install if odd errors appear</div>
+        <div class="keys"><kbd class="cmd">rm -rf node_modules .next &amp;&amp; npm ci</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">npm cache is global &amp; shared — fast re-installs<span class="hint">no setup needed</span></div>
+        <div class="keys"><kbd class="cmd">npm config get cache</kbd></div>
+      </div>
+    </div>
+
+    <!-- Callout -->
+    <div class="callout">
+      <strong>Quick start recipe</strong> &nbsp;·&nbsp;
+      You're on <code>main</code> mid-task and a hotfix lands. Instead of stashing:
+      <code>git worktree add -b hotfix ../myrepo-hotfix main</code> →
+      <code>cd ../myrepo-hotfix</code> → fix, commit, push, open PR →
+      <code>cd -</code> back to your original work, untouched. When the PR merges:
+      <code>git worktree remove ../myrepo-hotfix</code> and <code>git branch -D hotfix</code>.
+      <br><br>
+      <strong>Rescue commands</strong> &nbsp;·&nbsp;
+      Stale entry after <code>rm -rf</code>? <code>git worktree prune</code>.
+      Moved a folder in Finder? <code>git worktree repair</code>.
+      "Branch is already checked out" error? Use a different branch, or remove the other worktree first.
+    </div>
+
+  </div>
+
+  <footer>
+    <span>git worktree fundamentals · requires Git 2.5+ (move/repair need 2.17+ / 2.30+)</span>
+    <span>Print / Save as PDF: ⌘P (Mac) · Ctrl+P (Win/Linux)</span>
+  </footer>
+
+</div>
+</body>
+</html>

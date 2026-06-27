@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cheatsheets</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c232c;
+    --panel-hover: #1f2630;
+    --border: #30363d;
+    --border-hover: #484f58;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #7ee787;
+    --accent-2: #79c0ff;
+    --accent-3: #ffa657;
+    --key-bg: #21262d;
+    --key-border: #484f58;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text",
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 32px 64px;
+  }
+
+  /* ---------------- Header ---------------- */
+  header {
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 22px;
+    margin-bottom: 32px;
+  }
+
+  header .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  header .eyebrow::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 32px;
+    letter-spacing: -0.6px;
+  }
+  header h1 .accent { color: var(--accent); }
+
+  header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 640px;
+  }
+
+  /* ---------------- Toolbar ---------------- */
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    align-items: center;
+  }
+
+  .search {
+    flex: 1;
+    position: relative;
+  }
+  .search input {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 14px 10px 38px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .search input:focus {
+    outline: none;
+    border-color: var(--accent-2);
+    background: var(--panel-hover);
+  }
+  .search::before {
+    content: "⌕";
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  .counter {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 0 4px;
+    white-space: nowrap;
+  }
+  .counter strong { color: var(--accent); }
+
+  /* ---------------- Grid ---------------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 18px 16px;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    transition: transform 0.12s ease, border-color 0.12s, background 0.12s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-hover);
+    background: var(--panel-hover);
+  }
+  .card:hover .card-arrow { transform: translateX(3px); color: var(--accent); }
+  .card:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--key-bg);
+    border: 1px solid var(--key-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .card-icon.blue { color: var(--accent-2); }
+  .card-icon.orange { color: var(--accent-3); }
+
+  .card-arrow {
+    color: var(--muted);
+    font-size: 18px;
+    transition: transform 0.15s, color 0.15s;
+  }
+
+  .card h2 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    letter-spacing: -0.2px;
+  }
+  .card .subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 14px;
+    flex-grow: 1;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(139, 148, 158, 0.18);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .card-meta .filename { color: var(--muted); }
+  .card-meta .tags { display: flex; gap: 4px; }
+  .tag {
+    background: var(--key-bg);
+    border: 1px solid var(--key-border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-size: 10px;
+    color: var(--text);
+  }
+  .tag.print { color: var(--accent); border-color: rgba(126, 231, 135, 0.4); }
+  .tag.dark { color: var(--accent-2); border-color: rgba(121, 192, 255, 0.4); }
+
+  /* Framework card variant */
+  .card.framework {
+    border-color: rgba(121, 192, 255, 0.25);
+    background: linear-gradient(135deg, var(--panel) 0%, #1a2230 100%);
+  }
+  .card.framework .card-icon { color: var(--accent-2); }
+
+  /* Empty state */
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 13px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+  }
+  .empty.hidden { display: none; }
+
+  /* ---------------- Footer ---------------- */
+  footer {
+    margin-top: 48px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  footer code {
+    background: var(--key-bg);
+    border: 1px solid var(--key-border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+  footer kbd {
+    background: var(--key-bg);
+    border: 1px solid var(--key-border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: var(--text);
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 32px 20px 48px; }
+    header h1 { font-size: 26px; }
+    .toolbar { flex-direction: column; align-items: stretch; }
+    .counter { text-align: right; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">~/Documents/cheatsheets</div>
+    <h1><span class="accent">cheatsheets</span></h1>
+    <p>Printable, dark-mode-friendly references. Designed for one-page PDF export. All files built with the shared framework so the visual language stays consistent.</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="search">
+      <input id="search" type="search" placeholder="Filter cheatsheets…" autofocus autocomplete="off">
+    </div>
+    <div class="counter"><strong id="count">0</strong> / <span id="total">0</span> shown</div>
+  </div>
+
+  <div class="grid" id="grid">
+
+    <!-- Framework reference -->
+    <a class="card framework" href="FRAMEWORK.md" data-keywords="framework design system tokens reference meta">
+      <div class="card-head">
+        <div class="card-icon">§</div>
+        <div class="card-arrow">→</div>
+      </div>
+      <h2>Framework</h2>
+      <div class="subtitle">Design system, tokens, and component patterns shared by every cheatsheet in this folder.</div>
+      <div class="card-meta">
+        <span class="filename">FRAMEWORK.md</span>
+        <span class="tags"><span class="tag">meta</span></span>
+      </div>
+    </a>
+
+    <!-- tmux -->
+    <a class="card" href="tmux-cheatsheet.html" data-keywords="tmux terminal multiplexer session window pane shell">
+      <div class="card-head">
+        <div class="card-icon">⌘</div>
+        <div class="card-arrow">→</div>
+      </div>
+      <h2>tmux</h2>
+      <div class="subtitle">Sessions, windows, panes, copy mode. The fundamentals for the terminal multiplexer.</div>
+      <div class="card-meta">
+        <span class="filename">tmux-cheatsheet.html</span>
+        <span class="tags"><span class="tag dark">dark</span><span class="tag print">print</span></span>
+      </div>
+    </a>
+
+    <!-- git worktrees -->
+    <a class="card" href="git-worktrees-cheatsheet.html" data-keywords="git worktree branch checkout node npm next.js hotfix parallel">
+      <div class="card-head">
+        <div class="card-icon blue">⎇</div>
+        <div class="card-arrow">→</div>
+      </div>
+      <h2>git worktrees</h2>
+      <div class="subtitle">Multiple working directories from one repo. Create, list, prune, plus Node/Next.js tips.</div>
+      <div class="card-meta">
+        <span class="filename">git-worktrees-cheatsheet.html</span>
+        <span class="tags"><span class="tag dark">dark</span><span class="tag print">print</span></span>
+      </div>
+    </a>
+
+    <div class="empty hidden" id="empty">No cheatsheets match that filter.</div>
+  </div>
+
+  <footer>
+    <span>Add new cheatsheets to this folder · they'll follow the same framework.</span>
+    <span>Filter: type to search · <kbd>Esc</kbd> to clear</span>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    const input = document.getElementById('search');
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    const countEl = document.getElementById('count');
+    const totalEl = document.getElementById('total');
+    const cards = Array.from(grid.querySelectorAll('.card'));
+
+    totalEl.textContent = cards.length;
+    countEl.textContent = cards.length;
+
+    function filter() {
+      const q = input.value.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach(card => {
+        const hay = (card.dataset.keywords + ' ' + card.textContent).toLowerCase();
+        const match = !q || hay.includes(q);
+        card.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      countEl.textContent = visible;
+      empty.classList.toggle('hidden', visible > 0 || !q);
+    }
+
+    input.addEventListener('input', filter);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { input.value = ''; filter(); }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== input) {
+        e.preventDefault();
+        input.focus();
+      }
+    });
+  })();
+</script>
+</body>
+</html>
