@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PR Review Cheatsheet — Dijkstra-Inspired</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A one-page reference for reviewing pull requests through desired effects, refinement, invariants, topology, commitments, and evidence.">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c232c;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #7ee787;
+    --accent-2: #79c0ff;
+    --accent-3: #ffa657;
+    --key-bg: #21262d;
+    --key-border: #484f58;
+    --danger: #ff7b72;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text",
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 12.5px;
+    line-height: 1.42;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-2); text-underline-offset: 2px; }
+  a:hover { color: var(--accent); }
+  .page { max-width: 1100px; margin: 0 auto; padding: 26px 30px 36px; }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+  header .title h1 {
+    margin: 0;
+    color: var(--text);
+    font-size: 25px;
+    letter-spacing: -0.5px;
+  }
+  header .title h1 .accent { color: var(--accent); }
+  header .title p { margin: 3px 0 0; color: var(--muted); font-size: 11.5px; }
+  header .prefix {
+    min-width: 245px;
+    padding: 9px 12px;
+    text-align: right;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 10.5px;
+  }
+  header .prefix strong { display: block; color: var(--accent-2); font-size: 12px; }
+  header .prefix a { font-weight: 700; }
+
+  .legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 11px;
+    padding: 8px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 10.5px;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend .fact { color: var(--accent-2); }
+  .legend .proof { color: var(--accent); }
+  .legend .test { color: var(--accent-3); }
+  .legend .infer { color: var(--danger); }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 12px;
+    break-inside: avoid;
+  }
+  .card h2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 7px;
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+  }
+  .card h2 .num {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: var(--accent);
+    color: var(--bg);
+    text-align: center;
+    line-height: 18px;
+    font-size: 10.5px;
+    font-weight: 800;
+  }
+  .row {
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(139, 148, 158, 0.18);
+  }
+  .row:last-child { border-bottom: 0; }
+  .desc { color: var(--text); font-weight: 650; }
+  .hint { display: block; color: var(--muted); font-size: 10.25px; font-weight: 400; }
+  .token {
+    display: inline-block;
+    margin-right: 3px;
+    padding: 0 4px;
+    border: 1px solid var(--key-border);
+    border-radius: 3px;
+    background: var(--key-bg);
+    color: var(--accent-2);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 9.5px;
+    white-space: nowrap;
+  }
+  .token.green { color: var(--accent); }
+  .token.orange { color: var(--accent-3); }
+  .token.red { color: var(--danger); }
+
+  .mini-flow {
+    margin: 3px 0 5px;
+    padding: 6px 7px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 9.5px;
+    line-height: 1.45;
+  }
+  .mini-flow strong { color: var(--accent-2); }
+
+  .callout {
+    grid-column: 1 / -1;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, #1f2630 0%, #1a1f27 100%);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-2);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 10.75px;
+  }
+  .callout strong { color: var(--accent-2); }
+  .callout .north { color: var(--text); font-size: 11.5px; }
+  .callout a { font-weight: 800; white-space: nowrap; }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 9px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) {
+    .page { padding: 22px 18px 32px; }
+    header { align-items: flex-start; flex-direction: column; }
+    header .prefix { min-width: 0; width: 100%; text-align: left; }
+    .grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; }
+  }
+
+  @media print {
+    @page { size: Letter; margin: 0.35in; }
+    html, body { background: #ffffff !important; color: #111827 !important; font-size: 11px; line-height: 1.35; }
+    .page { padding: 0; max-width: none; }
+    header { margin-bottom: 7px; padding-bottom: 7px; border-color: #111827 !important; }
+    header .title h1 { color: #111827 !important; font-size: 20px; }
+    header .title h1 .accent, .card h2 { color: #15803d !important; }
+    header .title p, header .prefix, .legend, .hint, .callout, footer { color: #4b5563 !important; }
+    header .prefix {
+      min-width: 220px;
+      padding: 6px 8px;
+      background: #f3f4f6 !important;
+      border-color: #d1d5db !important;
+    }
+    header .prefix strong, a, .callout strong { color: #1d4ed8 !important; }
+    .legend {
+      margin-bottom: 7px;
+      padding: 5px 8px;
+      background: #f9fafb !important;
+      border-color: #d1d5db !important;
+    }
+    .legend .fact { color: #1d4ed8 !important; }
+    .legend .proof { color: #15803d !important; }
+    .legend .test { color: #9a3412 !important; }
+    .legend .infer { color: #b91c1c !important; }
+    .grid { gap: 7px; }
+    .card {
+      padding: 7px 8px;
+      background: #ffffff !important;
+      border-color: #d1d5db !important;
+    }
+    .card h2 { margin-bottom: 4px; font-size: 10px; }
+    .card h2 .num { background: #15803d !important; color: #ffffff !important; }
+    .row { padding: 3.5px 0; border-bottom-color: #e5e7eb !important; }
+    .desc, .callout .north { color: #111827 !important; }
+    .hint { font-size: 10px; }
+    .token {
+      background: #f3f4f6 !important;
+      border-color: #9ca3af !important;
+      color: #1d4ed8 !important;
+    }
+    .token.green { color: #15803d !important; }
+    .token.orange { color: #9a3412 !important; }
+    .token.red { color: #b91c1c !important; }
+    .mini-flow {
+      margin: 2px 0 3px;
+      padding: 4px 5px;
+      background: #f9fafb !important;
+      border-color: #d1d5db !important;
+      color: #4b5563 !important;
+      font-size: 9.5px;
+    }
+    .mini-flow strong { color: #1d4ed8 !important; }
+    .callout {
+      padding: 6px 9px;
+      background: #f9fafb !important;
+      border-color: #d1d5db !important;
+      border-left-color: #1d4ed8 !important;
+      font-size: 10.5px;
+    }
+    footer { margin-top: 7px; padding-top: 5px; border-top-color: #d1d5db !important; font-size: 9.5px; }
+    .card, .callout { break-inside: avoid; page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="title">
+      <h1><span class="accent">PR Review</span> Cheatsheet · Structured Correctness</h1>
+      <p>Dijkstra-inspired review through desired effects, refinement, invariants, topology, commitments, and evidence.</p>
+    </div>
+    <div class="prefix">
+      <strong>Want the reasoning behind this?</strong>
+      <a href="pr-review-deep-dive.html">Read the full deep dive →</a>
+      <div>Examples, agent roles, metrics, and source notes</div>
+    </div>
+  </header>
+
+  <div class="legend" aria-label="Evidence labels">
+    <span class="fact">● stated = issue / spec</span>
+    <span class="proof">● enforced = types / code</span>
+    <span class="test">● observed = tests / runs</span>
+    <span class="infer">● inferred = reviewer hypothesis</span>
+  </div>
+
+  <main class="grid">
+    <section class="card">
+      <h2><span class="num">1</span> Establish the thesis</h2>
+      <div class="row">
+        <div class="desc">Name the desired effect<span class="hint">What must become true for the user/domain?</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">State the semantic delta<span class="hint">What observable behavior changes?</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Protect unchanged behavior<span class="hint">What must remain exactly as before?</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Separate fact from inference<span class="hint">Label claims by their strongest evidence.</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write the thesis in one paragraph<span class="hint">If this is impossible, the PR may mix decisions.</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="num">2</span> Map the refinements</h2>
+      <div class="mini-flow"><strong>effect</strong> → domain → workflow → contract → representation → runtime</div>
+      <div class="row">
+        <div class="desc">Ask what the upper layer assumes</div>
+      </div>
+      <div class="row">
+        <div class="desc">Ask what the lower layer guarantees</div>
+      </div>
+      <div class="row">
+        <div class="desc">Name every new assumption<span class="hint">Then locate where it is enforced.</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Find representation leakage<span class="hint">Do upper layers know incidental storage details?</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Test the cut<span class="hint">Could the lower implementation be replaced?</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="num">3</span> Build the invariant ledger</h2>
+      <div class="row">
+        <div class="desc">Write each predicate precisely<span class="hint">Avoid “should work” or vague correctness claims.</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Name its stable points<span class="hint">Entry, exit, commit, settle, acknowledge.</span></div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token green">init</span> Establish it</div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token green">preserve</span> Keep it on every path</div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token green">exit</span> Derive the postcondition</div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token green">settle</span> Prove termination/quiescence</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="num">4</span> Record commitments</h2>
+      <div class="row">
+        <div class="desc">Identify the decision<span class="hint">Introduced, removed, replaced, or postponed?</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Find its structural owner</div>
+      </div>
+      <div class="row">
+        <div class="desc">Measure concept span<span class="hint">How many layers know the concrete choice?</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Name excluded alternatives<span class="hint">Which realistic option is now harder?</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Run the pearl test<span class="hint">One replaceable decision or scattered edits?</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Avoid speculative generality<span class="hint">Localize necessary choices; do not abstract blindly.</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="num">5</span> Diff the topology</h2>
+      <div class="row">
+        <div class="desc"><span class="token">control</span> New states or transitions?</div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token">data</span> Stale, lossy, duplicate paths?</div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token">deps</span> Cycles, fan-out, blast radius?</div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token">trust</span> Validation or auth bypass?</div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token">failure</span> Retry, recovery, compensation?</div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token">runtime</span> Do deployment assumptions match?</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="num">6</span> Falsify, classify, teach back</h2>
+      <div class="row">
+        <div class="desc">Search concrete counterexamples<span class="hint">Boundaries, races, retries, cancellation, failure.</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Map tests to obligations<span class="hint">Green CI is evidence, not proof.</span></div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token red">defect</span> Show violated property + path</div>
+      </div>
+      <div class="row">
+        <div class="desc"><span class="token orange">question</span> State unresolved obligation</div>
+      </div>
+      <div class="row">
+        <div class="desc">Report uninspected scope<span class="hint">Callers, tests, graphs, or runtime paths not checked.</span></div>
+      </div>
+      <div class="row">
+        <div class="desc">Teach the solution back<span class="hint">How it works, relies, fails, and changes later.</span></div>
+      </div>
+    </section>
+
+    <aside class="callout">
+      <span class="north"><strong>North-star question:</strong> What does this PR make true, what assumptions make that possible, where are those assumptions encoded, and how far through the system does each new design commitment reach?</span>
+      &nbsp;·&nbsp; Review in this order: desired effect → semantic delta → commitment delta → refinement ladder → invariant ledger → topology delta → counterexamples → option test → findings → teach-back.
+      &nbsp;·&nbsp; <a href="pr-review-deep-dive.html">Open the deep dive →</a>
+    </aside>
+  </main>
+
+  <footer>
+    <span>Inspired by E. W. Dijkstra’s <a href="https://www.cs.utexas.edu/~EWD/transcriptions/EWD02xx/EWD249/EWD249.html">EWD249</a> · topology and agent patterns are modern extensions</span>
+    <span>Print / Save as PDF: ⌘P (Mac) · Ctrl+P (Win/Linux)</span>
+  </footer>
+</div>
+</body>
+</html>

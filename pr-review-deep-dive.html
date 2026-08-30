@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Reviewing PRs as Structured Correctness Arguments — Deep Dive</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A Dijkstra-inspired framework for understanding pull requests through refinement, invariants, topology, design commitments, and agent-assisted review.">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c232c;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #7ee787;
+    --accent-2: #79c0ff;
+    --accent-3: #ffa657;
+    --key-bg: #21262d;
+    --key-border: #484f58;
+    --danger: #ff7b72;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text",
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent-2); text-underline-offset: 3px; }
+  a:hover { color: var(--accent); }
+  code, pre {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  code {
+    color: var(--accent);
+    background: var(--key-bg);
+    border: 1px solid var(--key-border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    margin: 14px 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    line-height: 1.5;
+    font-size: 13px;
+  }
+  pre code { color: inherit; background: none; border: 0; padding: 0; }
+
+  .skip-link {
+    position: absolute;
+    top: -48px;
+    left: 16px;
+    padding: 8px 12px;
+    background: var(--accent-2);
+    color: var(--bg);
+    border-radius: 4px;
+    z-index: 10;
+  }
+  .skip-link:focus { top: 12px; }
+
+  .page {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 32px 32px 56px;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 14px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .brand {
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    text-decoration: none;
+  }
+  .brand strong { color: var(--accent); }
+  .nav-links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .button-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-decoration: none;
+  }
+  .button-link.primary { color: var(--accent-2); border-color: var(--accent-2); }
+  .button-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 24px;
+  }
+  .eyebrow {
+    margin-bottom: 8px;
+    color: var(--accent-3);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+  }
+  h1 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(34px, 6vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -1.6px;
+  }
+  h1 .accent { color: var(--accent); }
+  .dek {
+    max-width: 760px;
+    margin: 16px 0 0;
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.55;
+  }
+  .hero-meta {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-2);
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .hero-meta strong { display: block; color: var(--accent-2); margin-bottom: 4px; }
+  .hero-meta ul { margin: 8px 0 0; padding-left: 17px; }
+  .hero-meta li { margin: 3px 0; }
+
+  .thesis {
+    margin: 28px 0 32px;
+    padding: 20px 22px;
+    background: linear-gradient(135deg, #1f2630 0%, #1a1f27 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    font-size: 19px;
+    line-height: 1.55;
+  }
+  .thesis strong { color: var(--accent); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+  .toc {
+    position: sticky;
+    top: 18px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 12px;
+  }
+  .toc strong {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .toc ol { margin: 0; padding-left: 20px; }
+  .toc li { margin: 5px 0; color: var(--muted); }
+  .toc a { color: var(--muted); text-decoration: none; }
+  .toc a:hover { color: var(--accent-2); }
+
+  main { min-width: 0; }
+  section {
+    margin-bottom: 46px;
+    scroll-margin-top: 20px;
+  }
+  h2 {
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--accent);
+    font-size: 27px;
+    line-height: 1.25;
+    letter-spacing: -0.4px;
+  }
+  h3 {
+    margin: 26px 0 8px;
+    color: var(--accent-2);
+    font-size: 19px;
+    line-height: 1.3;
+  }
+  h4 { margin: 18px 0 6px; color: var(--accent-3); font-size: 15px; }
+  p { margin: 10px 0; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-size: 16px; }
+  .note { color: var(--muted); font-size: 13px; }
+
+  .quote {
+    margin: 18px 0;
+    padding: 14px 18px;
+    color: var(--muted);
+    background: var(--panel);
+    border-left: 3px solid var(--accent-3);
+    border-radius: 0 8px 8px 0;
+  }
+  .quote p { margin: 0; font-size: 16px; }
+  .quote cite { display: block; margin-top: 7px; color: var(--accent-3); font-size: 11px; font-style: normal; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 15px 16px;
+    break-inside: avoid;
+  }
+  .card h3 { margin-top: 0; font-size: 16px; }
+  .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+  .number {
+    display: inline-flex;
+    width: 22px;
+    height: 22px;
+    margin-right: 6px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .table-wrap { overflow-x: auto; margin: 14px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    font-size: 13px;
+  }
+  th, td {
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--panel-2); color: var(--accent-2); }
+  td { color: var(--text); }
+
+  .diagram {
+    margin: 16px 0;
+    padding: 16px;
+    overflow-x: auto;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .diagram-row {
+    display: flex;
+    align-items: center;
+    min-width: 690px;
+    gap: 8px;
+  }
+  .node {
+    flex: 1;
+    min-width: 112px;
+    padding: 10px 8px;
+    text-align: center;
+    background: var(--panel);
+    border: 1px solid var(--key-border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 12px;
+  }
+  .arrow { color: var(--accent-3); font-weight: 800; }
+  .diagram-caption { margin-top: 9px; color: var(--muted); font-size: 11px; }
+
+  .classification {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .pill {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel);
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .pill strong { display: block; color: var(--text); }
+  .pill.stated { border-top: 3px solid var(--accent-2); }
+  .pill.enforced { border-top: 3px solid var(--accent); }
+  .pill.observed { border-top: 3px solid var(--accent-3); }
+  .pill.inferred { border-top: 3px solid var(--danger); }
+
+  .north-star {
+    margin-top: 34px;
+    padding: 22px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 20px;
+    line-height: 1.5;
+  }
+  .north-star strong { color: var(--accent); }
+
+  .sources {
+    padding: 16px 18px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 42px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .layout { grid-template-columns: 1fr; }
+    .toc { position: static; }
+    .toc ol { columns: 2; }
+  }
+  @media (max-width: 640px) {
+    .page { padding: 22px 18px 40px; }
+    .topbar { align-items: flex-start; flex-direction: column; }
+    .cards { grid-template-columns: 1fr; }
+    .classification { grid-template-columns: repeat(2, 1fr); }
+    .toc ol { columns: 1; }
+    h2 { font-size: 23px; }
+  }
+
+  @media print {
+    @page { size: Letter; margin: 0.55in; }
+    html, body { background: #ffffff !important; color: #111827 !important; font-size: 11.5px; }
+    .page { padding: 0; max-width: none; }
+    .skip-link, .topbar, .toc { display: none !important; }
+    .hero { grid-template-columns: 1fr 220px; gap: 16px; }
+    h1 { color: #111827 !important; font-size: 32px; }
+    h1 .accent, h2 { color: #15803d !important; }
+    h2 { border-color: #d1d5db !important; font-size: 20px; }
+    h3, a { color: #1d4ed8 !important; }
+    h4, .eyebrow, .quote cite { color: #9a3412 !important; }
+    .dek, .lead, .note, .hero-meta, .quote, .toc, footer, .diagram-caption { color: #4b5563 !important; }
+    .hero-meta, .card, .quote, .sources, .pill, .node {
+      background: #ffffff !important;
+      border-color: #d1d5db !important;
+      color: #111827 !important;
+    }
+    .thesis, .diagram, pre, table, th {
+      background: #f9fafb !important;
+      border-color: #d1d5db !important;
+      color: #111827 !important;
+    }
+    .thesis { border-left-color: #15803d !important; }
+    .thesis strong, .number { color: #15803d !important; }
+    .number { background: #dcfce7 !important; }
+    .hero-meta { border-left-color: #1d4ed8 !important; }
+    .hero-meta strong, th { color: #1d4ed8 !important; }
+    code { background: #f3f4f6 !important; border-color: #d1d5db !important; color: #15803d !important; }
+    pre code { background: transparent !important; border: 0 !important; color: #111827 !important; }
+    table, th, td { border-color: #d1d5db !important; }
+    td { background: #ffffff !important; color: #111827 !important; }
+    .arrow { color: #9a3412 !important; }
+    .pill.stated { border-top-color: #1d4ed8 !important; }
+    .pill.enforced { border-top-color: #15803d !important; }
+    .pill.observed { border-top-color: #9a3412 !important; }
+    .pill.inferred { border-top-color: #b91c1c !important; }
+    .north-star { background: #f3f4f6 !important; border-color: #d1d5db !important; color: #111827 !important; }
+    .north-star strong { color: #15803d !important; }
+    h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+    p, li { widows: 3; orphans: 3; }
+    .card, .quote, table, pre, .diagram, .north-star, .sources { break-inside: avoid; page-break-inside: avoid; }
+    footer { border-top-color: #d1d5db !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<div class="page">
+  <nav class="topbar" aria-label="Page navigation">
+    <a class="brand" href="index.html"><strong>cheatsheets</strong> / pr-review-deep-dive.html</a>
+    <div class="nav-links">
+      <a class="button-link primary" href="pr-review.html">Open the one-page cheat sheet →</a>
+      <a class="button-link" href="index.html">All cheatsheets</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Deep dive · Dijkstra-inspired PR review</div>
+      <h1>Reviewing PRs as <span class="accent">structured correctness arguments</span></h1>
+      <p class="dek">Move beyond line-by-line diff inspection. Reconstruct what the change makes true, how each layer establishes it, which invariants survive execution, and how far each new design commitment reaches.</p>
+    </div>
+    <aside class="hero-meta">
+      <strong>The five lenses</strong>
+      <ul>
+        <li>Desired effect</li>
+        <li>Refinement</li>
+        <li>Invariants</li>
+        <li>Topology</li>
+        <li>Commitments</li>
+      </ul>
+    </aside>
+  </header>
+
+  <div class="thesis">
+    <strong>Core thesis.</strong> Review a PR as a proposed refinement of a program: every abstraction layer has a contract, every meaningful execution boundary has truths that must hold, and the change must preserve or deliberately revise those truths. <em>The textual diff is evidence; it is not the real object of review.</em>
+  </div>
+
+  <div class="layout">
+    <aside class="toc" aria-label="Table of contents">
+      <strong>Contents</strong>
+      <ol>
+        <li><a href="#foundation">Dijkstra’s foundation</a></li>
+        <li><a href="#stages">Two kinds of stages</a></li>
+        <li><a href="#model">Three-axis model</a></li>
+        <li><a href="#commitments">Commitment delta</a></li>
+        <li><a href="#topology">PR topology</a></li>
+        <li><a href="#artifact">Review artifact</a></li>
+        <li><a href="#agents">Agent architecture</a></li>
+        <li><a href="#example">Worked example</a></li>
+        <li><a href="#experiment">First experiment</a></li>
+      </ol>
+    </aside>
+
+    <main id="content">
+      <section id="foundation">
+        <h2>1. Dijkstra’s foundation</h2>
+        <p class="lead">E. W. Dijkstra’s <cite>Notes on Structured Programming</cite> is about composing understandable programs, but its ideas map naturally onto modern code review.</p>
+
+        <h3>Respect cognitive limits</h3>
+        <p>Dijkstra begins by treating human intellectual capacity as a hard design constraint. Large programs cannot be understood by mentally simulating all possible executions. Clarity has quantitative aspects: the number and interaction of concepts matter, not merely whether each line is individually readable.</p>
+        <div class="quote">
+          <p>“as a slow-witted human being I have a very small head”</p>
+          <cite>“On our inability to do much,” EWD249</cite>
+        </div>
+        <p><strong>PR implication:</strong> size is not just lines changed. Count interacting design decisions, state transitions, assumptions, and architectural boundaries. A small diff can have a large intellectual surface.</p>
+
+        <h3>Testing is attempted falsification, not proof</h3>
+        <p>Black-box testing samples a negligible subset of possible behavior. Confidence in correctness therefore depends on the internal structure that supports an argument about all relevant computations.</p>
+        <div class="quote">
+          <p>“Program testing can be used to show the presence of bugs, but never to show their absence!”</p>
+          <cite>“On the reliability of mechanisms,” EWD249</cite>
+        </div>
+        <p><strong>PR implication:</strong> green CI is evidence, not the conclusion. Map tests to contracts and invariants, then identify the obligations that examples cannot establish alone.</p>
+
+        <h3>Review the computation, not the text alone</h3>
+        <p>A program exists to evoke computations that establish a desired effect. The reviewer’s task is therefore to connect static text to dynamic behavior: state changes, ordering, retries, errors, concurrency, and externally observable effects.</p>
+        <div class="quote">
+          <p>“My point is that a program is never a goal in itself; the purpose of a program is to evoke computations and the purpose of the computations is to establish a desired effect.”</p>
+          <cite>“On understanding programs,” EWD249</cite>
+        </div>
+
+        <h3>Use the right mental aid</h3>
+        <div class="cards">
+          <article class="card">
+            <h3><span class="number">1</span> Enumeration</h3>
+            <p>Use for a small, bounded sequence of actions or branches. Inspect each relevant case and derive the net effect.</p>
+          </article>
+          <article class="card">
+            <h3><span class="number">2</span> Induction</h3>
+            <p>Use for loops, recursion, repeated messages, retries, and state machine cycles: initialize, preserve, exit, and terminate.</p>
+          </article>
+          <article class="card">
+            <h3><span class="number">3</span> Abstraction</h3>
+            <p>Reason about a named operation by the properties its contract guarantees, without expanding all lower-level details.</p>
+          </article>
+          <article class="card">
+            <h3><span class="number">4</span> Simplicity</h3>
+            <p>When the correctness argument becomes long or clever, treat that as pressure to simplify the structure rather than celebrate cleverness.</p>
+          </article>
+        </div>
+
+        <h3>Think in pearls, cuts, and program families</h3>
+        <p>Dijkstra describes a program as a necklace of <strong>pearls</strong>, each embodying an independent design decision. A <strong>cut</strong> between pearls is an interface: the lower section provides the machine assumed by the upper section. A concept’s <strong>range of validity</strong> is the set of pearls that know about it.</p>
+        <p>Overlapping, long-lived concepts create a thicker <strong>logical rope</strong>—a system that is more tightly interconnected and harder to adapt. A change is safer when it replaces a coherent pearl while preserving the contracts above and below it.</p>
+        <p>Programs also belong to families of possible variants. Adaptability is not speculative generality; it is the ability to isolate a foreseeable choice so that changing it does not require “brain-made” edits scattered across the system.</p>
+      </section>
+
+      <section id="stages">
+        <h2>2. “True at every stage” has two meanings</h2>
+        <p>An invariant does not need to hold after every source statement. It can hold before and after a compound action while temporarily failing inside that action. The reviewer must name the stable points where the truth is required.</p>
+
+        <h3>Static stages: refinement</h3>
+        <div class="diagram" role="img" aria-label="Refinement ladder from desired effect to runtime primitives">
+          <div class="diagram-row">
+            <div class="node">Desired effect</div><div class="arrow">→</div>
+            <div class="node">Domain rules</div><div class="arrow">→</div>
+            <div class="node">Workflow</div><div class="arrow">→</div>
+            <div class="node">Contracts</div><div class="arrow">→</div>
+            <div class="node">Representation</div><div class="arrow">→</div>
+            <div class="node">Runtime primitives</div>
+          </div>
+          <div class="diagram-caption">Each lower level must provide the operations and properties assumed by the level immediately above it.</div>
+        </div>
+        <p>At every cut, ask:</p>
+        <ul>
+          <li>What does the upper layer assume?</li>
+          <li>What does the lower layer guarantee?</li>
+          <li>Does that guarantee fully implement the upper contract?</li>
+          <li>What new assumption did the refinement introduce?</li>
+          <li>Where is the assumption enforced?</li>
+          <li>Could the representation be replaced without changing unrelated upper layers?</li>
+        </ul>
+
+        <h3>Dynamic stages: execution</h3>
+        <div class="diagram" role="img" aria-label="Execution stages from stable pre-state through transition to stable post-state">
+          <div class="diagram-row">
+            <div class="node">Stable pre-state</div><div class="arrow">→</div>
+            <div class="node">Transition begins</div><div class="arrow">→</div>
+            <div class="node">Intermediate state</div><div class="arrow">→</div>
+            <div class="node">Commit / settle / compensate</div><div class="arrow">→</div>
+            <div class="node">Stable post-state</div>
+          </div>
+          <div class="diagram-caption">State may be transiently incomplete inside a protected operation. The review must establish where that state can be observed.</div>
+        </div>
+        <p>Stable boundaries can be public operation entry and exit, loop entry, transaction commit, message acknowledgement, promise settlement, retry exhaustion, or compensation completion.</p>
+      </section>
+
+      <section id="model">
+        <h2>3. The three-axis review model</h2>
+
+        <h3>Axis 1 — Refinement: does each “how” implement the “why” above it?</h3>
+        <p>Reconstruct the chain from user or domain effect to runtime mechanism. A PR becomes suspicious when a lower-level choice silently determines upper-level behavior—for example, when a database flag leaks into UI policy without an explicit domain decision.</p>
+        <p>For each level, record its responsibility, contract, implementation, new assumptions, private state, observable side effects, and replacement boundary.</p>
+
+        <h3>Axis 2 — Execution: what must remain true?</h3>
+        <pre><code>{ assumptions ∧ preconditions ∧ invariants }
+        changed action
+{ intended postconditions ∧ preserved invariants }</code></pre>
+        <p>For every repeated or stateful boundary, check:</p>
+        <ol>
+          <li><strong>Initialization:</strong> the invariant is established.</li>
+          <li><strong>Preservation:</strong> every changed path maintains it.</li>
+          <li><strong>Exit:</strong> the invariant plus the exit condition implies the result.</li>
+          <li><strong>Termination or settlement:</strong> the operation cannot repeat or remain pending forever without an explicit policy.</li>
+        </ol>
+        <p>Extend this reasoning to async and distributed systems: retries, cancellation, partial failure, idempotency, transaction scope, stale responses, and externally visible intermediate states.</p>
+
+        <h3>Axis 3 — Topology: which paths and boundaries changed?</h3>
+        <p>Model the PR as changes to several overlapping graphs rather than one dependency graph. This reveals how behavior, authority, data, and failure can now travel through the system.</p>
+      </section>
+
+      <section id="commitments">
+        <h2>4. Add a commitment delta</h2>
+        <p>A textual diff says what text changed. A <strong>commitment delta</strong> says which design choices became fixed, replaced, postponed, localized, or spread.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Decision</th><th>Before</th><th>After</th><th>Scope</th><th>Reversible at</th><th>Evidence</th></tr></thead>
+            <tbody>
+              <tr><td>Draft storage</td><td>Unspecified</td><td>PostgreSQL row</td><td>Persistence</td><td>Repository cut</td><td>Schema + repository</td></tr>
+              <tr><td>Visibility policy</td><td>Published only</td><td>Draft / published</td><td>Domain + API</td><td>Domain service</td><td>State model + auth</td></tr>
+              <tr><td>Retry semantics</td><td>Unspecified</td><td>Idempotency key</td><td>API operation</td><td>Request cut</td><td>Handler + constraint</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>For each new commitment, ask:</p>
+        <ol>
+          <li>Why must this decision be made in this PR?</li>
+          <li>Where is it structurally owned?</li>
+          <li>Which modules know about it?</li>
+          <li>Which invariants depend on it?</li>
+          <li>Which foreseeable alternative does it exclude?</li>
+          <li>Could it be replaced at one explicit boundary?</li>
+          <li>Would the surrounding correctness argument remain valid?</li>
+        </ol>
+
+        <h3>Concept span</h3>
+        <pre><code>concept span = number of architectural layers
+               that know a concrete decision</code></pre>
+        <p>A high span is not automatically wrong, but an increase means more code and more reasoning now depend on the choice. Ask whether upper layers know the domain concept—<em>draft</em>—or its incidental representation—<code>status === "DRAFT"</code>.</p>
+
+        <h3>Contract minimality</h3>
+        <p>The upper layer should know only the properties required for its reasoning. Look for leaked storage layout, incidental ordering, internal identifiers, mutable collections, cache details, lifecycle bookkeeping, or unstated side effects.</p>
+        <ul>
+          <li><strong>Completeness:</strong> does the implementation provide everything the caller requires?</li>
+          <li><strong>Restraint:</strong> does the caller rely only on behavior the interface promises?</li>
+        </ul>
+
+        <h3>The counterfactual option test</h3>
+        <p>Try one or two realistic alternatives: another database, a queued implementation, one adjacent domain state, a second provider, or streaming data. The system need not support the alternative now. Ask whether it would replace one pearl or require coordinated edits throughout the repository.</p>
+      </section>
+
+      <section id="topology">
+        <h2>5. Treat topology as a multi-graph</h2>
+        <p class="note">This is a modern extension of Dijkstra’s discussion of disciplined control-flow topology and his “logical rope” metaphor—not a claim that EWD249 defines these exact graphs.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Topology</th><th>Nodes and edges</th><th>Primary question</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Refinement / responsibility</strong></td><td>Claims, decisions, components, “implemented by” edges</td><td>Is each requirement implemented at the right level and in one clear home?</td></tr>
+              <tr><td><strong>Control / state</strong></td><td>States, transitions, branches, loops</td><td>Are illegal states or transitions newly reachable?</td></tr>
+              <tr><td><strong>Data / lineage</strong></td><td>Inputs, transformations, caches, stores, outputs</td><td>Where can data become stale, lossy, duplicated, or inconsistent?</td></tr>
+              <tr><td><strong>Dependency / call</strong></td><td>Modules, symbols, services, imports, calls</td><td>Did the PR introduce cycles, hidden coupling, or excessive fan-out?</td></tr>
+              <tr><td><strong>Trust / authority</strong></td><td>Actors, validation points, privileged effects</td><td>Is there a new path from untrusted input to a sensitive operation?</td></tr>
+              <tr><td><strong>Failure / recovery</strong></td><td>Failure points, propagation, retries, compensation</td><td>Can failure cross a boundary without translation or recovery?</td></tr>
+              <tr><td><strong>Runtime / deployment</strong></td><td>Processes, queues, stores, network links</td><td>Do code assumptions match the real execution topology?</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Useful topology-diff signals</h3>
+        <ul>
+          <li>New architectural-boundary crossing.</li>
+          <li>New cycle or strongly connected component.</li>
+          <li>Increased fan-in, fan-out, or reachable blast radius.</li>
+          <li>Bypass around an interface, authorization check, or validation point.</li>
+          <li>Newly reachable side effect or privileged sink.</li>
+          <li>Longer concept span across abstraction layers.</li>
+          <li>Failure path without compensation, recovery, or explicit propagation.</li>
+        </ul>
+        <p><strong>Important:</strong> these are risk indicators, not correctness proofs. A new edge may be precisely what the feature requires. The reviewer must connect the signal to a violated obligation or leave it as a question.</p>
+      </section>
+
+      <section id="artifact">
+        <h2>6. Produce a structured change argument</h2>
+        <p>Before emitting review comments, the agent should build a compact, auditable model of the change.</p>
+        <pre><code># 1. Change thesis
+The PR intends to establish ...
+It intentionally changes ...
+It must leave ... unchanged.
+
+# 2. Evidence and uncertainties
+- Stated facts: issue / spec / PR description
+- Enforced facts: types / schema / validation / code
+- Observed facts: tests / executed behavior
+- Inferred hypotheses: reviewer interpretation
+- Missing or contradictory information
+
+# 3. Commitment delta
+| Decision | Before | After | Scope | Reversible at | Evidence |
+
+# 4. Refinement ladder
+| Level | Responsibility | Contract | Implementation | New assumptions |
+
+# 5. Invariant ledger
+| ID | Predicate | Stable points | Source | Enforcement | Evidence | Status |
+
+# 6. Topology delta
+- Paths added or removed
+- Boundaries crossed or bypassed
+- Concept spans widened or narrowed
+- Blast-radius changes
+- New trust, failure, or side-effect paths
+
+# 7. Counterexample search
+| Candidate | Expected | Actual / evidence | Result |
+
+# 8. Program-family analysis
+- Decision being replaced
+- Future variants made easier or harder
+- Unrelated layers newly coupled
+
+# 9. Findings
+Only evidence-backed defects.
+Risks remain questions or proof obligations.
+
+# 10. Teach-back
+- The solution works by ...
+- It relies on ...
+- Its most important invariant is ...
+- It fails safely / unsafely when ...
+- A future change to X would touch ...</code></pre>
+
+        <h3>Use an evidence vocabulary</h3>
+        <div class="classification">
+          <div class="pill stated"><strong>Stated</strong>Issue, spec, docs</div>
+          <div class="pill enforced"><strong>Enforced</strong>Types, schema, code</div>
+          <div class="pill observed"><strong>Observed</strong>Tests, traces, runs</div>
+          <div class="pill inferred"><strong>Inferred</strong>Reviewer hypothesis</div>
+        </div>
+        <p>The vocabulary prevents an agent from presenting a plausible interpretation as a verified fact. A finding should identify the property, a concrete execution path or counterexample, exact evidence, assumptions, and a focused remediation or test.</p>
+      </section>
+
+      <section id="agents">
+        <h2>7. Divide agent work by reasoning role</h2>
+        <p>Start with three analytical lanes and a synthesizer. Avoid a large undirected swarm: agents should share proof obligations, not vote on conclusions.</p>
+        <div class="cards">
+          <article class="card">
+            <h3><span class="number">1</span> Refinement reconstructor</h3>
+            <ul>
+              <li>States the desired effect and semantic delta.</li>
+              <li>Traces the changed call paths and contracts.</li>
+              <li>Builds the refinement ladder.</li>
+              <li>Identifies cuts and new assumptions.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="number">2</span> Invariant falsifier</h3>
+            <ul>
+              <li>Extracts candidate invariants.</li>
+              <li>Names stable execution points.</li>
+              <li>Searches boundaries, failures, retries, races, and cancellation.</li>
+              <li>Returns violations, disproved concerns, or open obligations.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="number">3</span> Topology mapper</h3>
+            <ul>
+              <li>Builds before/after graph slices.</li>
+              <li>Finds boundary crossings and bypasses.</li>
+              <li>Reports concept-span and blast-radius changes.</li>
+              <li>Does not label structural deltas as defects alone.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="number">4</span> Synthesizer</h3>
+            <ul>
+              <li>Reconciles claims by evidence.</li>
+              <li>Runs deterministic checks.</li>
+              <li>Builds the structured argument.</li>
+              <li>Only then proposes review comments.</li>
+            </ul>
+          </article>
+        </div>
+        <p>Let LLMs supply hypotheses and explanations. Let deterministic tools supply diffs, AST/reference graphs, schemas, static-analysis output, tests, and runtime traces where practical.</p>
+
+        <h3>Rules that keep reviewers honest</h3>
+        <ul>
+          <li>Every invariant is labeled stated, enforced, observed, or inferred.</li>
+          <li>Every defect identifies a violated obligation and concrete evidence.</li>
+          <li>A plausible concern without a counterexample is a question, not a finding.</li>
+          <li>Missing tests are not automatically defects; name the uncovered obligation.</li>
+          <li>Passing tests do not establish a general property.</li>
+          <li>Agent conflicts become open obligations rather than majority votes.</li>
+          <li>Suppress style comments unless style obscures a contract, invariant, or design decision.</li>
+          <li>Report inspected callers, tests, and unexplored areas.</li>
+        </ul>
+      </section>
+
+      <section id="example">
+        <h2>8. Worked example: “Save draft”</h2>
+        <h3>Desired effect</h3>
+        <p>An owner can persist work without publishing it.</p>
+
+        <h3>Domain invariants</h3>
+        <ul>
+          <li>Only the owner can mutate the draft.</li>
+          <li>Saving cannot make content publicly visible.</li>
+          <li>A successful response identifies the version actually persisted.</li>
+          <li>Published content cannot silently revert to a stale draft.</li>
+        </ul>
+
+        <h3>Execution invariants</h3>
+        <ul>
+          <li>Retries do not create duplicate drafts.</li>
+          <li>A failed save does not leave the UI claiming success.</li>
+          <li>Concurrent save and publish operations have a defined outcome.</li>
+          <li>Cancellation does not discard a previously confirmed save.</li>
+        </ul>
+
+        <div class="diagram" role="img" aria-label="Save draft refinement cuts">
+          <div class="diagram-row">
+            <div class="node">UI state machine</div><div class="arrow">→</div>
+            <div class="node">API contract</div><div class="arrow">→</div>
+            <div class="node">Authorization + service</div><div class="arrow">→</div>
+            <div class="node">Transaction</div><div class="arrow">→</div>
+            <div class="node">DB constraints</div>
+          </div>
+        </div>
+
+        <h3>Questions that reveal the foundation</h3>
+        <ul>
+          <li><strong>Topology:</strong> did the endpoint reuse the authorization cut, or create a direct path from request data to persistence?</li>
+          <li><strong>Adaptability:</strong> is “draft” a domain state, or a database flag whose representation leaks through UI, API, analytics, and notifications?</li>
+          <li><strong>Execution:</strong> which write wins when save and publish race?</li>
+          <li><strong>Evidence:</strong> is ownership only stated in the PR, or enforced by the query and covered by an adversarial test?</li>
+        </ul>
+      </section>
+
+      <section id="experiment">
+        <h2>9. The smallest worthwhile experiment</h2>
+        <ol>
+          <li>Choose one medium-sized PR and review it normally, but do not comment yet.</li>
+          <li>Have one tool-enabled agent produce the structured change argument.</li>
+          <li>Compare its model with yours: missing invariants, incorrect assumptions, overlooked execution states, and surprising topology changes.</li>
+          <li>Measure useful defects, false positives, unsupported claims, time to accurate teach-back, obligations backed by evidence, and predicted versus actual blast radius.</li>
+          <li>Split into specialized agents only after the single reviewer’s failure modes are visible.</li>
+        </ol>
+
+        <h3>The refined review sequence</h3>
+        <pre><code>1. Desired effect       — What must become true?
+2. Semantic delta       — What changes or stays unchanged?
+3. Commitment delta     — Which decisions become fixed or postponed?
+4. Refinement ladder    — How does each layer establish the one above?
+5. Invariant ledger     — What must hold, and at which stable points?
+6. Topology delta       — Which important paths and boundaries changed?
+7. Counterexamples      — Can a changed path violate an obligation?
+8. Option test          — Is each commitment localized and replaceable?
+9. Findings             — Satisfied, violated, or unresolved obligations
+10. Teach-back          — Can you explain the solution and foundation?</code></pre>
+
+        <div class="north-star">
+          <strong>North star:</strong><br>
+          What does this PR make true, what assumptions make that possible, where are those assumptions encoded, and how far through the system does each new design commitment reach?
+        </div>
+      </section>
+
+      <section aria-labelledby="sources-heading">
+        <h2 id="sources-heading">Source and attribution</h2>
+        <div class="sources">
+          <p><strong>Primary source:</strong> <a href="https://www.cs.utexas.edu/~EWD/transcriptions/EWD02xx/EWD249/EWD249.html">E. W. Dijkstra, <cite>Notes on Structured Programming</cite> (EWD249)</a>, second edition, April 1970.</p>
+          <p>The refinement, invariant, program-family, pearl, cut, range-of-validity, logical-rope, and delayed-commitment ideas are grounded in EWD249. The multi-graph PR-topology model, commitment-delta table, concept-span metric, structured change argument, and agent roles are modern derived applications.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <span>Dijkstra-inspired PR review · deep dive</span>
+    <span><a href="pr-review.html">One-page cheat sheet</a> · Print / Save as PDF: ⌘P (Mac) · Ctrl+P (Win/Linux)</span>
+  </footer>
+</div>
+</body>
+</html>

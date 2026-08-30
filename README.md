@@ -8,6 +8,8 @@ Open [`index.html`](./index.html) in a browser for the landing page.
 
 - [`tmux.html`](./tmux.html) — Sessions, windows, panes, copy mode
 - [`git-worktrees.html`](./git-worktrees.html) — Create, list, prune, plus Node/Next.js tips
+- [`pr-review.html`](./pr-review.html) — One-page Dijkstra-inspired PR review flow
+- [`pr-review-deep-dive.html`](./pr-review-deep-dive.html) — Refinement, invariants, topology, commitments, and review-agent design
 
 ## Design
 
