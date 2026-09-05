@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Compose Key Cheatsheet — Omarchy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c232c;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #7ee787;
+    --accent-2: #79c0ff;
+    --accent-3: #ffa657;
+    --key-bg: #21262d;
+    --key-border: #484f58;
+    --shadow: 0 1px 0 #000, 0 2px 0 #000;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text",
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 32px 40px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+  }
+
+  header .title h1 {
+    margin: 0;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  header .title h1 .accent { color: var(--accent); }
+
+  header .title p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  header .prefix {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  header .prefix strong {
+    display: block;
+    color: var(--accent-2);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    break-inside: avoid;
+  }
+
+  .card h2 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card h2 .num {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: var(--accent);
+    color: #0d1117;
+    font-size: 11px;
+    text-align: center;
+    line-height: 18px;
+    font-weight: 700;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(139, 148, 158, 0.18);
+  }
+  .row:last-child { border-bottom: none; }
+
+  .desc { color: var(--text); }
+  .desc .hint { color: var(--muted); font-size: 11px; display: block; }
+
+  .keys {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  kbd {
+    display: inline-block;
+    background: var(--key-bg);
+    color: var(--text);
+    border: 1px solid var(--key-border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    min-width: 16px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  kbd.prefix { color: var(--accent-2); border-color: var(--accent-2); }
+  kbd.cmd { color: var(--accent-3); border-color: #6e4e1a; background: #2a1f0f; }
+  kbd.then {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 0 2px;
+    min-width: 0;
+  }
+
+  .callout {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #1f2630 0%, #1a1f27 100%);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .callout strong { color: var(--accent-2); }
+  .callout code {
+    background: var(--key-bg);
+    border: 1px solid var(--key-border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  footer {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* ---------------- Print styles ---------------- */
+  @media print {
+    @page { size: Letter; margin: 0.4in; }
+    html, body {
+      background: #ffffff !important;
+      color: #111827 !important;
+      font-size: 10.5px;
+    }
+    .page { padding: 0; max-width: none; }
+    .grid { grid-template-columns: repeat(3, 1fr) !important; }
+    header {
+      border-color: #111827;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+    header .title h1 { color: #111827; font-size: 21px; }
+    header .title h1 .accent { color: #15803d; }
+    header .title p { color: #4b5563; }
+    header .prefix {
+      background: #f3f4f6 !important;
+      border-color: #d1d5db;
+      color: #4b5563;
+      padding: 6px 10px;
+    }
+    header .prefix strong { color: #1d4ed8; }
+
+    .legend {
+      background: #f9fafb !important;
+      border-color: #d1d5db;
+      color: #4b5563;
+      margin-bottom: 8px;
+      padding: 6px 10px;
+    }
+
+    .card {
+      background: #ffffff !important;
+      border-color: #d1d5db !important;
+      box-shadow: none;
+      padding: 7px 8px;
+    }
+    .card h2 { color: #15803d; font-size: 10.5px; margin-bottom: 4px; }
+    .card h2 .num { background: #15803d; color: #ffffff; }
+
+    .desc { color: #111827; }
+    .desc .hint { color: #6b7280; font-size: 8.5px; }
+    .row { border-bottom-color: #e5e7eb; gap: 4px; padding: 2px 0; line-height: 1.25; }
+
+    kbd {
+      background: #f3f4f6 !important;
+      color: #111827 !important;
+      border-color: #9ca3af !important;
+      font-size: 8.5px;
+      line-height: 1.25;
+      padding: 0 3px;
+    }
+    kbd.prefix { color: #1d4ed8 !important; border-color: #1d4ed8 !important; }
+    kbd.cmd {
+      background: #fff7ed !important;
+      color: #9a3412 !important;
+      border-color: #c2410c !important;
+    }
+    kbd.then {
+      background: transparent !important;
+      border: none !important;
+      color: #6b7280 !important;
+    }
+
+    .callout {
+      background: #f9fafb !important;
+      border-color: #d1d5db !important;
+      border-left: 3px solid #1d4ed8 !important;
+      color: #374151 !important;
+      padding: 7px 10px;
+      font-size: 9.5px;
+      line-height: 1.35;
+    }
+    .callout strong { color: #1d4ed8 !important; }
+    .callout code {
+      background: #f3f4f6 !important;
+      color: #15803d !important;
+      border-color: #d1d5db !important;
+      font-size: 8.5px;
+    }
+
+    footer {
+      color: #6b7280;
+      border-top-color: #d1d5db;
+      margin-top: 8px;
+      padding-top: 6px;
+      font-size: 8.5px;
+    }
+    .card, .callout { page-break-inside: avoid; }
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="title">
+      <h1><span class="accent">Compose key</span> Cheatsheet · Omarchy</h1>
+      <p>Type arrows, accents, math, and typography with memorable key sequences.</p>
+    </div>
+    <div class="prefix">
+      <strong>Compose key</strong>
+      <kbd class="prefix">Caps Lock</kbd>
+      <div style="margin-top:4px;">Tap, release, then type the sequence</div>
+    </div>
+  </header>
+
+  <div class="legend">
+    <span><kbd class="prefix">Caps Lock</kbd> = Compose (press first)</span>
+    <span><kbd>x</kbd> = next key</span>
+    <span><kbd class="cmd">command</kbd> = type in a shell</span>
+    <span><kbd class="then">then</kbd> = press in sequence</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- Start composing -->
+    <div class="card">
+      <h2><span class="num">1</span> Start Composing</h2>
+      <div class="row">
+        <div class="desc">Write é<span class="hint">acute accent</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>'</kbd> <kbd>e</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ü<span class="hint">diaeresis / umlaut</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>&quot;</kbd> <kbd>u</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ñ<span class="hint">tilde</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>~</kbd> <kbd>n</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ç<span class="hint">cedilla</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>,</kbd> <kbd>c</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write å<span class="hint">ring above</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>o</kbd> <kbd>a</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ø<span class="hint">o with stroke</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>/</kbd> <kbd>o</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ß<span class="hint">German sharp s</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>s</kbd> <kbd>s</kbd></div>
+      </div>
+    </div>
+
+    <!-- Arrows -->
+    <div class="card">
+      <h2><span class="num">2</span> Arrows</h2>
+      <div class="row">
+        <div class="desc">Write →<span class="hint">right</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>-</kbd> <kbd>&gt;</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ←<span class="hint">left</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>&lt;</kbd> <kbd>-</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ↑<span class="hint">up</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>|</kbd> <kbd>^</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ↓<span class="hint">down</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>|</kbd> <kbd>v</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ⇒<span class="hint">double right</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>=</kbd> <kbd>&gt;</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ⇐<span class="hint">double left</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>=</kbd> <kbd>&lt;</kbd></div>
+      </div>
+    </div>
+
+    <!-- Math and comparison -->
+    <div class="card">
+      <h2><span class="num">3</span> Math &amp; Comparison</h2>
+      <div class="row">
+        <div class="desc">Write ≠<span class="hint">not equal</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>/</kbd> <kbd>=</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ≤<span class="hint">less than or equal</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>&lt;</kbd> <kbd>=</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ≥<span class="hint">greater than or equal</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>&gt;</kbd> <kbd>=</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ±<span class="hint">plus or minus</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>+</kbd> <kbd>-</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ×<span class="hint">multiplication</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>x</kbd> <kbd>x</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ÷<span class="hint">division</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>:</kbd> <kbd>-</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ∞<span class="hint">infinity</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>8</kbd> <kbd>8</kbd></div>
+      </div>
+    </div>
+
+    <!-- Typography -->
+    <div class="card">
+      <h2><span class="num">4</span> Typography</h2>
+      <div class="row">
+        <div class="desc">Write …<span class="hint">ellipsis</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>.</kbd> <kbd>.</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write –<span class="hint">en dash</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>-</kbd> <kbd>-</kbd> <kbd>.</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write —<span class="hint">em dash</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>-</kbd> <kbd>-</kbd> <kbd>-</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write “<span class="hint">open double quote</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>&lt;</kbd> <kbd>&quot;</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ”<span class="hint">close double quote</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>&gt;</kbd> <kbd>&quot;</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ‘<span class="hint">open single quote</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>&lt;</kbd> <kbd>'</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ’<span class="hint">close single quote</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>&gt;</kbd> <kbd>'</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write a non-breaking space</div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>Space</kbd> <kbd>Space</kbd></div>
+      </div>
+    </div>
+
+    <!-- Symbols and currency -->
+    <div class="card">
+      <h2><span class="num">5</span> Symbols &amp; Currency</h2>
+      <div class="row">
+        <div class="desc">Write ©<span class="hint">copyright</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>o</kbd> <kbd>c</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ®<span class="hint">registered</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>o</kbd> <kbd>r</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ™<span class="hint">trademark</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>t</kbd> <kbd>m</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write °<span class="hint">degree</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>o</kbd> <kbd>o</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write €<span class="hint">euro</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>e</kbd> <kbd>=</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write £<span class="hint">pound sterling</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>l</kbd> <kbd>-</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write ¥<span class="hint">yen</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>y</kbd> <kbd>=</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write µ<span class="hint">micro sign</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>m</kbd> <kbd>u</kbd></div>
+      </div>
+    </div>
+
+    <!-- Escape hatch -->
+    <div class="card">
+      <h2><span class="num">6</span> Control &amp; Troubleshoot</h2>
+      <div class="row">
+        <div class="desc">Cancel a sequence<span class="hint">before it completes</span></div>
+        <div class="keys"><kbd>Esc</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Write a capital accent<span class="hint">example: É</span></div>
+        <div class="keys"><kbd class="prefix">Caps</kbd> <kbd class="then">then</kbd> <kbd>'</kbd> <kbd>Shift</kbd>+<kbd>e</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Enable real Caps Lock<span class="hint">press together</span></div>
+        <div class="keys"><kbd>Left Shift</kbd>+<kbd>Right Shift</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Disable real Caps Lock<span class="hint">tap either one alone</span></div>
+        <div class="keys"><kbd>Shift</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Check your locale<span class="hint">selects the Compose table</span></div>
+        <div class="keys"><kbd class="cmd">locale</kbd></div>
+      </div>
+      <div class="row">
+        <div class="desc">Read the format manual<span class="hint">custom sequence syntax</span></div>
+        <div class="keys"><kbd class="cmd">man Compose</kbd></div>
+      </div>
+    </div>
+
+    <!-- Quick recipe / callout -->
+    <div class="callout">
+      <strong>If you only remember three things</strong> &nbsp;·&nbsp;
+      Tap and release <kbd class="prefix">Caps Lock</kbd> before every sequence. Use shapes that resemble the result:
+      <kbd>&lt;</kbd><kbd>-</kbd> makes ←, <kbd>-</kbd><kbd>&gt;</kbd> makes →, and <kbd>/</kbd><kbd>=</kbd> makes ≠.
+      Press <kbd>Esc</kbd> if you start a sequence by mistake.
+      <br><br>
+      <strong>Full mapping file</strong> &nbsp;·&nbsp;
+      <code>/usr/share/X11/locale/en_US.UTF-8/Compose</code>. Sequences can vary by locale and application; these match Omarchy's installed US UTF-8 table.
+    </div>
+
+  </div>
+
+  <footer>
+    <span>Omarchy Quattro · Caps Lock is Compose · keys are pressed in sequence</span>
+    <span>Print / Save as PDF: ⌘P (Mac) · Ctrl+P (Win/Linux)</span>
+  </footer>
+
+</div>
+</body>
+</html>
