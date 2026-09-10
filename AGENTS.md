@@ -2,6 +2,41 @@
 
 > Single-purpose repo: a collection of printable, dark-mode-friendly HTML cheatsheets the owner uses as fast desk references and PDF exports.
 
+## Asking the User
+
+**Every decision, ambiguity, or confirmation is asked as a multiple-choice question.** Use the harness-specific question function for asking the user questions (ex: `vscode_askQuestions` in GitHub Copilot, or `default_mode_request_user_input` in Codex). Never ask an open-ended question when the options are enumerable, and never guess a user preference to keep the pipeline moving.
+
+Contract for every question:
+
+- The **first option is the recommendation**, and its label ends with `(Recommended)`.
+- Labels are 1-5 words. The `description` states the consequence of choosing it, what happens next and what it costs.
+- `header` ≤ 12 characters.
+- `multiSelect: false` unless the choices genuinely combine.
+- The harness's dedicated function should supply a free-text **Other** option
+- **Batch all pending questions into a single call.** Do not drip-feed one at a time.
+- Act on the answer. Do not re-ask or seek a second confirmation for the same decision.
+
+Example Shape:
+
+```
+AskUserQuestion({ // In this example, the harness defines AskUserQuestion
+  questions: [{
+    header: "Cleanup",
+    question: "The planning documents are superseded by docs/spec/<feature-name>.md. Delete them?",
+    multiSelect: false,
+    options: [
+      { label: "Delete (Recommended)", description: "Removed in this same commit and PR. Single source of truth." },
+      { label: "Keep",                 description: "Planning history retained. Spec and planning docs will drift apart." }
+    ]
+  }]
+})
+```
+
+If such a function is unavailable, render the identical options as a numbered list, recommended first, and wait for an explicit reply.
+
+**Genuine dead-ends are not questions.** When there is no valid path forward -- missing planning artifacts, empty PR body, wrong artifact filenames, etc. -- stop and report plainly. Offering a choice between two failures is noise.
+
+
 ## Owner
 
 - **User:** Rogelio Macedo (`r0m0gg2`)
