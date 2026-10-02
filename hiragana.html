@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hiragana Cheatsheet — Japan Basics</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c232c;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #7ee787;
+    --accent-2: #79c0ff;
+    --accent-3: #ffa657;
+    --key-bg: #21262d;
+    --key-border: #484f58;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
+      "Yu Gothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px; line-height: 1.4; -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1100px; margin: 0 auto; padding: 28px 32px 40px; }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 18px; border-bottom: 2px solid var(--border); padding-bottom: 14px; margin-bottom: 14px;
+  }
+  header .title h1 { margin: 0; font-size: 26px; letter-spacing: -0.5px; color: var(--text); }
+  header .title h1 .accent { color: var(--accent); }
+  header .title p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+  header .prefix {
+    flex: 0 0 auto; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 13px; text-align: right; font-size: 11px; color: var(--muted);
+  }
+  header .prefix strong { display: block; color: var(--accent-2); font-size: 13px; margin-bottom: 3px; }
+  .legend {
+    display: flex; gap: 14px; margin-bottom: 12px; padding: 9px 13px; background: var(--panel-2);
+    border: 1px solid var(--border); border-radius: 8px; font-size: 11px; color: var(--muted);
+    align-items: center; flex-wrap: wrap;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; break-inside: avoid;
+  }
+  .chart-card { grid-column: 1 / -1; }
+  .card h2 {
+    margin: 0 0 8px; font-size: 13px; letter-spacing: 0.4px; text-transform: uppercase;
+    color: var(--accent); display: flex; align-items: center; gap: 6px;
+  }
+  .num {
+    display: inline-block; width: 18px; height: 18px; border-radius: 4px; background: var(--accent);
+    color: #0d1117; font-size: 11px; text-align: center; line-height: 18px; font-weight: 700;
+  }
+  .sub { color: var(--muted); font-weight: normal; text-transform: none; font-size: 11px; }
+  .row {
+    display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+    padding: 4px 0; border-bottom: 1px dashed rgba(139, 148, 158, 0.18);
+  }
+  .row:last-child { border-bottom: none; }
+  .desc { color: var(--text); }
+  .hint { color: var(--muted); font-size: 11px; display: block; }
+  .keys { display: flex; gap: 4px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+  kbd {
+    display: inline-block; background: var(--key-bg); color: var(--text); border: 1px solid var(--key-border);
+    border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px; line-height: 1.4; text-align: center; white-space: nowrap;
+  }
+  kbd.prefix { color: var(--accent-2); border-color: var(--accent-2); }
+  kbd.cmd { color: var(--accent-3); border-color: #6e4e1a; background: #2a1f0f; }
+  kbd.then { background: transparent; border: none; color: var(--muted); padding: 0 2px; }
+  .kana { font-size: 18px; min-width: 28px; }
+  .gojuon { width: 100%; border-collapse: separate; border-spacing: 5px; table-layout: fixed; }
+  .gojuon th { color: var(--muted); font-size: 10px; font-weight: 600; text-align: center; padding-bottom: 1px; }
+  .gojuon td { background: var(--key-bg); border: 1px solid var(--key-border); border-radius: 5px; text-align: center; padding: 4px 2px; }
+  .gojuon td.blank { background: transparent; border-style: dashed; border-color: rgba(139, 148, 158, 0.22); }
+  .kana-char { display: block; color: var(--text); font-size: 21px; line-height: 1.05; font-weight: 600; }
+  .romaji { display: block; color: var(--accent-2); font: 10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin-top: 2px; }
+  .chart-note { margin: 7px 0 0; color: var(--muted); font-size: 11px; }
+  .callout {
+    grid-column: 1 / -1; background: linear-gradient(135deg, #1f2630 0%, #1a1f27 100%);
+    border: 1px solid var(--border); border-left: 3px solid var(--accent-2); border-radius: 8px;
+    padding: 11px 15px; color: var(--muted); font-size: 12px; break-inside: avoid;
+  }
+  .callout strong { color: var(--accent-2); }
+  .callout code {
+    background: var(--key-bg); border: 1px solid var(--key-border); border-radius: 3px; padding: 1px 5px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-size: 11px; color: var(--accent);
+  }
+  footer {
+    margin-top: 16px; padding-top: 11px; border-top: 1px solid var(--border); color: var(--muted);
+    font-size: 11px; display: flex; justify-content: space-between; gap: 12px;
+  }
+
+  @media print {
+    @page { size: Letter; margin: 0.4in; }
+    html, body { background: #ffffff !important; color: #111827 !important; font-size: 8.5px; zoom: 0.8; }
+    .page { padding: 0; max-width: none; }
+    header { border-color: #111827; padding-bottom: 7px; margin-bottom: 7px; }
+    header .title h1 { color: #111827; font-size: 20px; } header .title h1 .accent { color: #15803d; }
+    header .title p { color: #4b5563; font-size: 9px; }
+    header .prefix { background: #f3f4f6 !important; border-color: #d1d5db; color: #4b5563; padding: 5px 8px; font-size: 8px; }
+    header .prefix strong { color: #1d4ed8; }
+    .legend { background: #f9fafb !important; border-color: #d1d5db; color: #4b5563; margin-bottom: 6px; padding: 5px 8px; font-size: 8px; gap: 8px; }
+    header .prefix, .legend, .hint { display: none; }
+    .grid { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .card { grid-column: span 2; background: #ffffff !important; border-color: #d1d5db !important; padding: 6px 8px; }
+    .chart-card, .callout { grid-column: 1 / -1; }
+    .chart-card { order: 0; }
+    .card:not(.chart-card):not(.phrase-card):not(.practice-card) { order: 1; }
+    .practice-card { order: 1; }
+    .phrase-card { grid-column: span 3; order: 2; }
+    .callout { order: 3; }
+    .card h2 { color: #15803d; margin-bottom: 4px; font-size: 9px; } .num { background: #15803d; color: #ffffff; width: 14px; height: 14px; line-height: 14px; font-size: 8px; }
+    .sub, .hint, .chart-note { color: #6b7280 !important; }
+    .sub, .hint { font-size: 7.5px; } .desc { color: #111827; } .row { border-bottom-color: #e5e7eb; padding: 2px 0; gap: 4px; }
+    .gojuon td { background: #f3f4f6 !important; border-color: #9ca3af !important; }
+    .gojuon td.blank { background: #ffffff !important; border-color: #d1d5db !important; }
+    .gojuon { border-spacing: 2px; } .gojuon td { padding: 2px 1px; } .gojuon th { color: #4b5563; font-size: 8px; } .kana-char { color: #111827; font-size: 16px; } .romaji { color: #1d4ed8; font-size: 7.5px; } .chart-note { margin: 3px 0 0; font-size: 7.5px; }
+    kbd { background: #f3f4f6 !important; color: #111827 !important; border-color: #9ca3af !important; padding: 0 3px; font-size: 8px; }
+    kbd.prefix { color: #1d4ed8 !important; border-color: #1d4ed8 !important; }
+    kbd.cmd { background: #fff7ed !important; color: #9a3412 !important; border-color: #c2410c !important; }
+    kbd.then { background: transparent !important; border: none !important; color: #6b7280 !important; }
+    .callout { background: #f9fafb !important; border-color: #d1d5db !important; border-left-color: #1d4ed8 !important; color: #374151 !important; padding: 6px 9px; font-size: 8px; }
+    .callout strong { color: #1d4ed8 !important; } .callout code { background: #f3f4f6 !important; color: #15803d !important; border-color: #d1d5db !important; font-size: 8px; }
+    footer { color: #6b7280; border-top-color: #d1d5db; margin-top: 7px; padding-top: 6px; font-size: 8px; }
+    .card, .callout { page-break-inside: avoid; }
+  }
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } .chart-card, .callout { grid-column: 1 / -1; } }
+  @media (max-width: 600px) {
+    .page { padding: 22px 18px 32px; } header { align-items: flex-start; flex-direction: column; }
+    .grid { grid-template-columns: 1fr; } .gojuon { border-spacing: 2px; } .gojuon td { padding: 3px 1px; }
+    .kana-char { font-size: 17px; } .romaji { font-size: 8px; } footer { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="title">
+      <h1><span class="accent">Hiragana</span> Cheatsheet · Japan Basics</h1>
+      <p>Read the 46 basic sounds, say them clearly, and use the travel phrases from your reel.</p>
+    </div>
+    <div class="prefix">
+      <strong>Start here</strong>
+      Learn sound, not English spelling
+      <div style="margin-top:3px;">Read aloud: a · i · u · e · o</div>
+    </div>
+  </header>
+
+  <div class="legend">
+    <span><kbd class="prefix">kana</kbd> = Japanese character</span>
+    <span><kbd>romaji</kbd> = pronunciation guide</span>
+    <span><kbd class="cmd">particle</kbd> = grammar word with a special reading</span>
+  </div>
+
+  <div class="grid">
+    <section class="card chart-card">
+      <h2><span class="num">1</span> The 46 basic hiragana <span class="sub">(gojūon — read each row left → right)</span></h2>
+      <table class="gojuon" aria-label="The 46 basic hiragana and their romanized pronunciation">
+        <thead><tr><th></th><th>a</th><th>i</th><th>u</th><th>e</th><th>o</th></tr></thead>
+        <tbody>
+          <tr><th>Vowels</th><td><span class="kana-char">あ</span><span class="romaji">a</span></td><td><span class="kana-char">い</span><span class="romaji">i</span></td><td><span class="kana-char">う</span><span class="romaji">u</span></td><td><span class="kana-char">え</span><span class="romaji">e</span></td><td><span class="kana-char">お</span><span class="romaji">o</span></td></tr>
+          <tr><th>K</th><td><span class="kana-char">か</span><span class="romaji">ka</span></td><td><span class="kana-char">き</span><span class="romaji">ki</span></td><td><span class="kana-char">く</span><span class="romaji">ku</span></td><td><span class="kana-char">け</span><span class="romaji">ke</span></td><td><span class="kana-char">こ</span><span class="romaji">ko</span></td></tr>
+          <tr><th>S</th><td><span class="kana-char">さ</span><span class="romaji">sa</span></td><td><span class="kana-char">し</span><span class="romaji">shi</span></td><td><span class="kana-char">す</span><span class="romaji">su</span></td><td><span class="kana-char">せ</span><span class="romaji">se</span></td><td><span class="kana-char">そ</span><span class="romaji">so</span></td></tr>
+          <tr><th>T</th><td><span class="kana-char">た</span><span class="romaji">ta</span></td><td><span class="kana-char">ち</span><span class="romaji">chi</span></td><td><span class="kana-char">つ</span><span class="romaji">tsu</span></td><td><span class="kana-char">て</span><span class="romaji">te</span></td><td><span class="kana-char">と</span><span class="romaji">to</span></td></tr>
+          <tr><th>N</th><td><span class="kana-char">な</span><span class="romaji">na</span></td><td><span class="kana-char">に</span><span class="romaji">ni</span></td><td><span class="kana-char">ぬ</span><span class="romaji">nu</span></td><td><span class="kana-char">ね</span><span class="romaji">ne</span></td><td><span class="kana-char">の</span><span class="romaji">no</span></td></tr>
+          <tr><th>H</th><td><span class="kana-char">は</span><span class="romaji">ha*</span></td><td><span class="kana-char">ひ</span><span class="romaji">hi</span></td><td><span class="kana-char">ふ</span><span class="romaji">fu</span></td><td><span class="kana-char">へ</span><span class="romaji">he*</span></td><td><span class="kana-char">ほ</span><span class="romaji">ho</span></td></tr>
+          <tr><th>M</th><td><span class="kana-char">ま</span><span class="romaji">ma</span></td><td><span class="kana-char">み</span><span class="romaji">mi</span></td><td><span class="kana-char">む</span><span class="romaji">mu</span></td><td><span class="kana-char">め</span><span class="romaji">me</span></td><td><span class="kana-char">も</span><span class="romaji">mo</span></td></tr>
+          <tr><th>Y</th><td><span class="kana-char">や</span><span class="romaji">ya</span></td><td class="blank"></td><td><span class="kana-char">ゆ</span><span class="romaji">yu</span></td><td class="blank"></td><td><span class="kana-char">よ</span><span class="romaji">yo</span></td></tr>
+          <tr><th>R</th><td><span class="kana-char">ら</span><span class="romaji">ra</span></td><td><span class="kana-char">り</span><span class="romaji">ri</span></td><td><span class="kana-char">る</span><span class="romaji">ru</span></td><td><span class="kana-char">れ</span><span class="romaji">re</span></td><td><span class="kana-char">ろ</span><span class="romaji">ro</span></td></tr>
+          <tr><th>W + n</th><td><span class="kana-char">わ</span><span class="romaji">wa</span></td><td class="blank"></td><td><span class="kana-char">ん</span><span class="romaji">n</span></td><td class="blank"></td><td><span class="kana-char">を</span><span class="romaji">wo†</span></td></tr>
+        </tbody>
+      </table>
+      <p class="chart-note">Plus <strong>ん / n</strong> — the only standalone consonant. * は is <em>wa</em> and へ is <em>e</em> when used as particles. † を is usually pronounced <em>o</em> in modern speech.</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="num">2</span> Nail the vowels</h2>
+      <div class="row"><div class="desc">あ — open “a”<span class="hint">like “a” in father</span></div><div class="keys"><kbd class="kana">あ</kbd><kbd>a</kbd></div></div>
+      <div class="row"><div class="desc">い — bright “ee”<span class="hint">like machine</span></div><div class="keys"><kbd class="kana">い</kbd><kbd>i</kbd></div></div>
+      <div class="row"><div class="desc">う — short “oo”<span class="hint">say it without rounded lips</span></div><div class="keys"><kbd class="kana">う</kbd><kbd>u</kbd></div></div>
+      <div class="row"><div class="desc">え — “eh”<span class="hint">like get</span></div><div class="keys"><kbd class="kana">え</kbd><kbd>e</kbd></div></div>
+      <div class="row"><div class="desc">お — clean “oh”<span class="hint">not a diphthong</span></div><div class="keys"><kbd class="kana">お</kbd><kbd>o</kbd></div></div>
+    </section>
+
+    <section class="card">
+      <h2><span class="num">3</span> Tricky sounds</h2>
+      <div class="row"><div class="desc">し is “shi”<span class="hint">not “see”</span></div><div class="keys"><kbd class="kana">し</kbd><kbd>shi</kbd></div></div>
+      <div class="row"><div class="desc">ち is “chi”<span class="hint">not “tee”</span></div><div class="keys"><kbd class="kana">ち</kbd><kbd>chi</kbd></div></div>
+      <div class="row"><div class="desc">つ is “tsu”<span class="hint">say “sue” after a quick t</span></div><div class="keys"><kbd class="kana">つ</kbd><kbd>tsu</kbd></div></div>
+      <div class="row"><div class="desc">ふ is soft “fu”<span class="hint">a light breath, not English “foo”</span></div><div class="keys"><kbd class="kana">ふ</kbd><kbd>fu</kbd></div></div>
+      <div class="row"><div class="desc">R is a quick tongue tap<span class="hint">between r, l, and d</span></div><div class="keys"><kbd class="kana">ら</kbd><kbd>ra</kbd></div></div>
+      <div class="row"><div class="desc">Keep each vowel even<span class="hint">Japanese rhythm is steady</span></div><div class="keys"><kbd>o-i-shi-i</kbd></div></div>
+    </section>
+
+    <section class="card phrase-card">
+      <h2><span class="num">4</span> At the table <span class="sub">(from your reel)</span></h2>
+      <div class="row"><div class="desc">Before eating<span class="hint">“I humbly receive” / let’s eat</span></div><div class="keys"><kbd class="kana">いただきます</kbd><kbd>itadakimasu</kbd></div></div>
+      <div class="row"><div class="desc">This is delicious<span class="hint">polite</span></div><div class="keys"><kbd class="kana">美味しいです</kbd><kbd>oishii desu</kbd></div></div>
+      <div class="row"><div class="desc">A beer, please</div><div class="keys"><kbd class="kana">ビールをください</kbd><kbd>bīru o kudasai</kbd></div></div>
+      <div class="row"><div class="desc">After eating<span class="hint">“thank you for the meal”</span></div><div class="keys"><kbd class="kana">ごちそうさまでした</kbd><kbd>gochisōsama deshita</kbd></div></div>
+    </section>
+
+    <section class="card phrase-card">
+      <h2><span class="num">5</span> Out and about <span class="sub">(from your reel)</span></h2>
+      <div class="row"><div class="desc">How much is this?</div><div class="keys"><kbd class="kana">これ、いくらですか？</kbd><kbd>kore, ikura desu ka?</kbd></div></div>
+      <div class="row"><div class="desc">Excuse me<span class="hint">standard polite form</span></div><div class="keys"><kbd class="kana">すみません</kbd><kbd>sumimasen</kbd></div></div>
+      <div class="row"><div class="desc">Where is the toilet?</div><div class="keys"><kbd class="kana">トイレはどこですか？</kbd><kbd>toire wa doko desu ka?</kbd></div></div>
+      <div class="row"><div class="desc">Thank you very much</div><div class="keys"><kbd class="kana">ありがとうございます</kbd><kbd>arigatō gozaimasu</kbd></div></div>
+    </section>
+
+    <section class="card practice-card">
+      <h2><span class="num">6</span> Read it today</h2>
+      <div class="row"><div class="desc">Scan vowels first<span class="hint">recognition before handwriting</span></div><div class="keys"><kbd>あいうえお</kbd></div></div>
+      <div class="row"><div class="desc">Read one row aloud<span class="hint">keep the rhythm even</span></div><div class="keys"><kbd>かきくけこ</kbd></div></div>
+      <div class="row"><div class="desc">Cover the romaji<span class="hint">force recall, then check</span></div><div class="keys"><kbd>→</kbd></div></div>
+      <div class="row"><div class="desc">Spot kana on signs<span class="hint">look for familiar sounds</span></div><div class="keys"><kbd>トイレ</kbd></div></div>
+      <div class="row"><div class="desc">Use one phrase today<span class="hint">small real reps stick</span></div><div class="keys"><kbd>ありがとう</kbd></div></div>
+    </section>
+
+    <aside class="callout">
+      <strong>Quick sentence map</strong> &nbsp;·&nbsp;
+      Your rule is a great travel default: <code>[topic] は → [object] を → verb</code>. Japanese verbs normally come at the end, and a known subject is often omitted. Read the particles specially: <kbd class="cmd">は</kbd> is <strong>wa</strong> as the topic marker; <kbd class="cmd">を</kbd> is usually <strong>o</strong> as the object marker. Example: <code>ビールをください</code> = “Beer, please.” Today’s 10-minute drill: read the chart twice, cover the romaji and recall one row, then say one travel phrase to a real person.
+    </aside>
+  </div>
+
+  <footer>
+    <span>46 basic hiragana · phrases transcribed from Rogi’s supplied reel frames</span>
+    <span>Print / Save as PDF: ⌘P (Mac) · Ctrl+P (Win/Linux)</span>
+  </footer>
+</div>
+</body>
+</html>
